@@ -1,0 +1,31 @@
+name: משימת פיתוח
+description: משימה מתוכנית המימוש
+labels: []
+body:
+  - type: textarea
+    id: required
+    attributes:
+      label: מה נדרש
+    validations:
+      required: true
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: תוצר מצופה
+      description: איך יודעים שהמשימה גמורה
+    validations:
+      required: true
+  - type: input
+    id: section
+    attributes:
+      label: סעיף במבדק
+      placeholder: "§1"
+  - type: input
+    id: estimate
+    attributes:
+      label: הערכת זמן (שעות)
+  - type: input
+    id: depends
+    attributes:
+      label: תלוי ב
+      placeholder: "#5"
