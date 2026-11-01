@@ -101,6 +101,24 @@ flowchart LR
   class T1,T3,T4,T5,T7,T9,T10,T15,T16,T17,T20,T21,T22 crit
 ```
 
+## ניהול העבודה ב-GitHub (מוקם לפני Task 1, על ידי המשתמשת)
+
+- **Labels:** `backend`, `frontend`, `database`, `testing`, `ci`, `docs`, `stretch`.
+- **Milestones:** `Day 1 – Setup` (01/11) … `Day 6 – Submission` (06/11).
+- **Issues:** אחד לכל משימה בטבלה, עם Label, Milestone ו-Assignee.
+- **GitHub Projects:** לוח Kanban בשם `Service Requests` עם העמודות Todo / In Progress / Done; ה-Issues מתווספים אליו, ועוברים אוטומטית ל-In Progress בפתיחת PR ול-Done ב-Merge.
+
+## Definition of Done
+
+משימה גמורה רק כאשר:
+1. הבדיקות שבמשימה כתובות, נכשלו לפני המימוש ועוברות אחריו.
+2. `dotnet build -warnaserror` / `ng lint` – בלי אזהרות.
+3. כל ה-Suite עובר מקומית, וה-CI ירוק על ה-PR.
+4. Self-review של ה-diff נעשה (ו-Code Review מתועד במשימות 9, 10, 13, 15).
+5. תיעוד שהמשימה משנה עודכן (README / docs / `requests.http`).
+6. אין סודות, סיסמאות אמיתיות או קבצים אישיים ב-commit.
+7. ה-PR סוגר את ה-Issue (`Closes #N`) והצ'קליסט שלו מסומן.
+
 ## תהליך לכל משימה
 
 1. ליצור Issue (כותרת = שם המשימה, תווית, Milestone של היום, Assignee = המשתמשת).
@@ -118,6 +136,7 @@ flowchart LR
 
 **Files:**
 - Create: `global.json`, `Directory.Build.props`, `Directory.Packages.props`, `.editorconfig`, `ServiceRequests.slnx`
+- Create: `.github/pull_request_template.md` (מה השתנה, איך נבדק, סעיף במבדק, `Closes #`, צ'קליסט Definition of Done), `.github/ISSUE_TEMPLATE/task.yml` (מה נדרש, תוצר מצופה, סעיף, הערכה, תלויות)
 - Create: `src/ServiceRequests.{Domain,Infrastructure,Application,Api}/*.csproj`, `tests/ServiceRequests.{UnitTests,IntegrationTests}/*.csproj`
 
 **Interfaces:**
