@@ -1,0 +1,77 @@
+{
+  "labels": [
+    { "name": "backend",  "color": "1f6feb", "description": "ASP.NET Core API, Application, Domain" },
+    { "name": "frontend", "color": "8250df", "description": "Angular client" },
+    { "name": "database", "color": "bf8700", "description": "Schema, indexes, migrations, seeding" },
+    { "name": "testing",  "color": "1a7f37", "description": "Automated tests" },
+    { "name": "ci",       "color": "57606a", "description": "GitHub Actions" },
+    { "name": "docs",     "color": "0969da", "description": "Documentation" },
+    { "name": "planning", "color": "d4c5f9", "description": "Specs and plans" },
+    { "name": "stretch",  "color": "eeeeee", "description": "Optional if time allows" }
+  ],
+  "milestones": [
+    { "title": "Day 1 – Setup",                   "due": "2026-11-01T21:59:00Z" },
+    { "title": "Day 2 – Data & Search",           "due": "2026-11-02T21:59:00Z" },
+    { "title": "Day 3 – Updates & Bulk",          "due": "2026-11-03T21:59:00Z" },
+    { "title": "Day 4 – UI & Performance",        "due": "2026-11-04T21:59:00Z" },
+    { "title": "Day 5 – Auth, Docs & Submission", "due": "2026-11-05T21:59:00Z" }
+  ],
+  "issues": [
+    { "title": "Write design spec", "labels": ["planning", "docs"], "milestone": "Day 1 – Setup", "closedBy": 1,
+      "body": "**מה נדרש:** מסמך אפיון טכני עם כל ההחלטות, הנימוקים והחלופות.\n**תוצר:** `docs/specs/2026-11-01-service-requests-design.md`\n**סעיפים:** כל הסעיפים\n**הערכה:** 4 שעות" },
+    { "title": "Write implementation plan", "labels": ["planning", "docs"], "milestone": "Day 1 – Setup", "closedBy": 2,
+      "body": "**מה נדרש:** פירוק ה-Spec למשימות עם הערכות, תלויות ו-Critical Path.\n**תוצר:** `docs/plans/2026-11-01-implementation-plan.md`\n**סעיף:** §9\n**הערכה:** 2 שעות" },
+
+    { "task": 1, "title": "Set up solution skeleton and build configuration", "labels": ["backend", "ci"], "milestone": "Day 1 – Setup",
+      "body": "**מה נדרש:** Solution עם 4 פרויקטים ו-2 פרויקטי בדיקות, global.json, Directory.Build.props, Directory.Packages.props, .editorconfig, PR/Issue templates.\n**תוצר:** `dotnet build` ללא אזהרות.\n**סעיף:** §10\n**הערכה:** 1 שעה\n**תלוי ב:** –" },
+    { "task": 2, "title": "Add CI for backend build and tests", "labels": ["ci", "testing"], "milestone": "Day 1 – Setup",
+      "body": "**מה נדרש:** GitHub Actions עם Build ובדיקות מול SQL Server 2022 בקונטיינר; Branch Protection על main.\n**תוצר:** Check ירוק על PR.\n**סעיפים:** §8, §10\n**הערכה:** 1 שעה\n**תלוי ב:** משימה 1" },
+    { "task": 3, "title": "Add domain model and status transitions", "labels": ["backend", "testing"], "milestone": "Day 1 – Setup",
+      "body": "**מה נדרש:** ServiceRequest, RequestStatusHistory, Enums, StatusTransitions, FieldLengths, User + Unit Tests.\n**תוצר:** בדיקות מעברים עוברות.\n**סעיף:** §2\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 1" },
+
+    { "task": 4, "title": "Add database schema, indexes and test infrastructure", "labels": ["database", "testing"], "milestone": "Day 2 – Data & Search",
+      "body": "**מה נדרש:** DbContext, קונפיגורציה, CHECK constraints, rowversion, 5 אינדקסים, Migration ראשון, ApiFactory עם DB לכל מחלקת בדיקות.\n**תוצר:** SchemaTests עוברות.\n**סעיפים:** §1, §6\n**הערכה:** 2 שעות\n**תלוי ב:** משימה 3" },
+    { "task": 5, "title": "Add deterministic seeder for 100,000 requests", "labels": ["database"], "milestone": "Day 2 – Data & Search",
+      "body": "**מה נדרש:** SqlBulkCopy, Seed קבוע, נתונים בעברית, היסטוריה עקבית, פקודת seed ליצירה חוזרת.\n**תוצר:** 100,000 פניות בפחות מ-30 שניות.\n**סעיף:** נתונים\n**הערכה:** 2 שעות\n**תלוי ב:** משימה 4" },
+    { "task": 6, "title": "Add API platform: errors, JSON, health and logging", "labels": ["backend"], "milestone": "Day 2 – Data & Search",
+      "body": "**מה נדרש:** ProblemDetails + IExceptionHandler, Enums כטקסט, /health, LoggerMessage, ICurrentUser זמני, TimeProvider.\n**תוצר:** PlatformTests עוברות.\n**סעיף:** §10\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 4" },
+    { "task": 7, "title": "Add request search with filtering, sorting and paging", "labels": ["backend", "testing"], "milestone": "Day 2 – Data & Search",
+      "body": "**מה נדרש:** GET /api/requests ו-GET /api/requests/{id}; Validation, Escape ל-LIKE, טווח תאריכים חצי-פתוח, Whitelist למיון, Projection ל-DTO, CancellationToken.\n**תוצר:** SearchRequestsTests עוברות (כולל Review Focus 1–3).\n**סעיף:** §1\n**הערכה:** 3 שעות\n**תלוי ב:** משימות 5, 6" },
+
+    { "task": 8, "title": "Add faceted summary with cache", "labels": ["backend", "testing"], "milestone": "Day 3 – Updates & Bulk",
+      "body": "**מה נדרש:** GET /api/requests/summary עם Faceted Counts; HybridCache לסיכום ללא סינון עם Generation Key.\n**תוצר:** SummaryTests ו-SummaryCacheTests עוברות, כולל מרוץ בין חישוב לעדכון.\n**סעיפים:** §1, §7\n**הערכה:** 2 שעות\n**תלוי ב:** משימה 7" },
+    { "task": 9, "title": "Add status update with optimistic concurrency and audit", "labels": ["backend", "testing"], "milestone": "Day 3 – Updates & Bulk",
+      "body": "**מה נדרש:** PATCH /status עם rowVersion בגוף, בדיקת גרסה לפני מעבר, Audit באותה טרנזקציה, 409 עם current, GET /history, בדיקת מרוץ דטרמיניסטית.\n**תוצר:** UpdateStatusTests, ConcurrencyTests, HistoryTests עוברות.\n**סעיפים:** §2, §3\n**הערכה:** 3 שעות\n**תלוי ב:** משימה 7" },
+    { "task": 10, "title": "Add bulk status update with partial success", "labels": ["backend", "testing"], "milestone": "Day 3 – Updates & Bulk",
+      "body": "**מה נדרש:** POST /bulk-status עד 100 פניות, Validation של הבקשה כולה, סיווג בזיכרון, שמירה מרוכזת עם לולאת Conflict.\n**תוצר:** BulkUpdateTests ו-BulkConcurrencyTests עוברות (כולל Review Focus 4).\n**סעיף:** §4\n**הערכה:** 3 שעות\n**תלוי ב:** משימה 9" },
+    { "task": 11, "title": "Set up Angular app with Material, RTL and CI", "labels": ["frontend", "ci"], "milestone": "Day 3 – Updates & Bulk",
+      "body": "**מה נדרש:** Angular 22, Angular Material, RTL ועברית, ESLint ו-Prettier, Proxy, Job של Frontend ב-CI.\n**תוצר:** ng lint, ng test, ng build עוברים ב-CI.\n**סעיף:** §5\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 2\n\n🔍 **בסוף היום: נקודת החלטה על התחברות והרשאות.**" },
+
+    { "task": 12, "title": "Add API client, error mapping and connection handling", "labels": ["frontend", "testing"], "milestone": "Day 4 – UI & Performance",
+      "body": "**מה נדרש:** RequestsApiService, מודלים, errorInterceptor ל-ApiError בעברית, connectionInterceptor עם Retry ל-GET בלבד, באנר ניתוק.\n**תוצר:** בדיקות Interceptors עוברות.\n**סעיף:** §5\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימות 7, 11" },
+    { "task": 13, "title": "Add requests list with URL-driven state", "labels": ["frontend", "testing"], "milestone": "Day 4 – UI & Performance",
+      "body": "**מה נדרש:** State מה-URL עם switchMap, Debounce בחיפוש, טבלה עם מיון ודפדוף בשרת, כרטיסי סיכום, Chips, מצבי Loading/Empty/Error, נגישות.\n**תוצר:** בדיקות State ו-Filters עוברות; רענון ו-Back שומרים תצוגה.\n**סעיף:** §5\n**הערכה:** 4 שעות\n**תלוי ב:** משימות 8, 12" },
+    { "task": 14, "title": "Add request details page with conflict dialog", "labels": ["frontend", "testing"], "milestone": "Day 4 – UI & Performance",
+      "body": "**מה נדרש:** Route /requests/:id, כפתורים לפי allowedTransitions, היסטוריה, דיאלוג 409, נגישות.\n**תוצר:** בדיקות Details ו-ConflictDialog עוברות.\n**סעיף:** §5\n**הערכה:** 2 שעות\n**תלוי ב:** משימות 9, 13" },
+    { "task": 18, "title": "Measure performance and document indexes", "labels": ["database", "docs"], "milestone": "Day 4 – UI & Performance",
+      "body": "**מה נדרש:** SQL אמיתי מהלוג, STATISTICS IO/TIME ו-Execution Plan לפני ואחרי, Fragmentation, השערת Filtered Index, PERFORMANCE.md.\n**תוצר:** קבצי .sqlplan, measure.sql, PERFORMANCE.md.\n**סעיף:** §6\n**הערכה:** 2.5 שעות\n**תלוי ב:** משימה 10" },
+
+    { "task": 15, "title": "Add JWT authentication and role-based authorization", "labels": ["backend", "testing"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "⚑ **בלוק מותנה – לפי נקודת ההחלטה בסוף יום 3.**\n\n**מה נדרש:** Users, Login, JWT, Fallback Policy, Manager בלבד ל-Bulk, ICurrentUser מה-Claims.\n**תוצר:** AuthTests עוברות; כל הבדיקות עוברות עם טוקן.\n**סעיפים:** §2, §3\n**הערכה:** 2 שעות\n**תלוי ב:** משימה 10" },
+    { "task": 16, "title": "Add login page, auth guard and token interceptor", "labels": ["frontend", "testing"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "⚑ **בלוק מותנה – לפי נקודת ההחלטה בסוף יום 3.**\n\n**מה נדרש:** AuthService, Login, authGuard, authInterceptor, 401 → Login.\n**תוצר:** בדיקות Auth בלקוח עוברות.\n**סעיף:** §5\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימות 14, 15" },
+    { "task": 17, "title": "Add bulk status update to the requests list", "labels": ["frontend", "testing"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "**מה נדרש:** בחירת שורות, סרגל Bulk (רק ל-Manager אם ⚑ נכנס), דיאלוג תוצאות בעברית עם קישור לכל פנייה שנכשלה.\n**תוצר:** בדיקות BulkActionBar ו-BulkResultDialog עוברות.\n**סעיפים:** §4, §5\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 14" },
+    { "task": 20, "title": "Add HTTP request samples and CI smoke test", "labels": ["ci", "docs", "testing"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "**מה נדרש:** requests.http לפי סעיפי המבדק עם תשובות אמיתיות; smoke.ps1 שמריץ את פקודת ה-README; Job של smoke ב-CI.\n**תוצר:** Check ירוק של smoke.\n**סעיף:** §11\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 17" },
+    { "task": 21, "title": "Write README, reviewer guide and deployment docs", "labels": ["docs"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "**מה נדרש:** README, REVIEWER_GUIDE עם Traceability Matrix וצילומי מסך, DEPLOYMENT_GCP, השלמת AI_USAGE ו-WORK_PLAN.\n**תוצר:** כל מסמכי ההגשה.\n**סעיפים:** §9, §11\n**הערכה:** 2 שעות\n**תלוי ב:** משימות 18, 20" },
+    { "task": 22, "title": "Run final verification before submission", "labels": ["testing", "docs"], "milestone": "Day 5 – Auth, Docs & Submission",
+      "body": "**מה נדרש:** Clone נקי והרצה לפי README, כל הבדיקות ירוקות, מעבר על Traceability Matrix, Lighthouse, Code Review, שעות בפועל.\n**תוצר:** Repository מוכן להגשה.\n**סעיפים:** כולם\n**הערכה:** 1.5 שעות\n**תלוי ב:** משימה 21" },
+
+    { "task": "S1", "title": "Add load test with NBomber", "labels": ["testing", "stretch"], "milestone": null,
+      "body": "**Stretch.** 20 משתמשים וירטואליים, דקה, 80% חיפוש ו-20% עדכון; p50/p95 ומספר 409.\n**סעיף:** §6\n**הערכה:** 3 שעות" },
+    { "task": "S2", "title": "Add more frontend tests", "labels": ["frontend", "testing", "stretch"], "milestone": null,
+      "body": "**Stretch.** מצבי UI בכל מסך, Chips, Paginator בעברית.\n**סעיף:** §8\n**הערכה:** 1.5 שעות" }
+  ]
+}
