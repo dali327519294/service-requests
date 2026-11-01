@@ -26,6 +26,15 @@ public class StatusTransitionsTests
         => Assert.Empty(StatusTransitions.AllowedFrom(RequestStatus.Completed));
 
     [Fact]
+    public void Returned_list_cannot_change_the_shared_rules()
+    {
+        var allowed = (IList<RequestStatus>)StatusTransitions.AllowedFrom(RequestStatus.New);
+
+        Assert.Throws<NotSupportedException>(() => allowed[0] = RequestStatus.Completed);
+        Assert.False(StatusTransitions.IsAllowed(RequestStatus.New, RequestStatus.Completed));
+    }
+
+    [Fact]
     public void InProgress_allows_waiting_and_completed()
         => Assert.Equal([RequestStatus.Waiting, RequestStatus.Completed], StatusTransitions.AllowedFrom(RequestStatus.InProgress));
 }
