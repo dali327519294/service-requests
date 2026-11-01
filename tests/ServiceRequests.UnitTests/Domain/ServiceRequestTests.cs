@@ -66,6 +66,23 @@ public class ServiceRequestTests
     }
 
     [Fact]
+    public void AssignedTo_longer_than_the_limit_is_rejected()
+    {
+        var assignedTo = new string('x', FieldLengths.AssignedTo + 1);
+
+        Assert.Throws<ArgumentException>(
+            () => new ServiceRequest("כותרת", "ארגון", RequestPriority.Low, RequestStatus.New, assignedTo, CreatedAt));
+    }
+
+    [Fact]
+    public void ChangeStatus_rejects_a_time_that_is_not_utc()
+    {
+        var localTime = new DateTime(2026, 3, 2, 11, 30, 0, DateTimeKind.Local);
+
+        Assert.Throws<ArgumentException>(() => NewRequest().ChangeStatus(RequestStatus.InProgress, "dana", localTime));
+    }
+
+    [Fact]
     public void Empty_organization_name_is_rejected()
         => Assert.Throws<ArgumentException>(
             () => new ServiceRequest("כותרת", " ", RequestPriority.Low, RequestStatus.New, null, CreatedAt));

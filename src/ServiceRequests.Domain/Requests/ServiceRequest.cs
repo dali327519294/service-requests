@@ -20,7 +20,7 @@ public class ServiceRequest
         OrganizationName = RequireText(organizationName, FieldLengths.OrganizationName, nameof(organizationName));
         Priority = priority;
         Status = status;
-        AssignedTo = assignedTo;
+        AssignedTo = assignedTo is null ? null : RequireText(assignedTo, FieldLengths.AssignedTo, nameof(assignedTo));
         CreatedAt = createdAt;
         UpdatedAt = createdAt;
     }
@@ -30,6 +30,10 @@ public class ServiceRequest
     public RequestStatusHistory ChangeStatus(RequestStatus newStatus, string changedBy, DateTime utcNow)
     {
         RequireText(changedBy, FieldLengths.ChangedBy, nameof(changedBy));
+        if (utcNow.Kind != DateTimeKind.Utc)
+        {
+            throw new ArgumentException("Must be a UTC time.", nameof(utcNow));
+        }
 
         if (!StatusTransitions.IsAllowed(Status, newStatus))
         {
