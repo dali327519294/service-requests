@@ -487,6 +487,7 @@ dist/
 
 # --- Personal interview prep (not part of the submission) ---
 interview-sentences.md
+study-notes-*.md
 
 # --- Local AI execution workspace (plan progress ledger) ---
 .superpowers/
