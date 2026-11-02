@@ -11,8 +11,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly string _connectionString = TestDatabase.CreateConnectionString();
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder) =>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
         builder.UseSetting("ConnectionStrings:ServiceRequestsDb", _connectionString);
+        // Tests seed exactly the data they need; 100,000 demo rows per test class would only slow them down
+        builder.UseSetting("Database:InitializeOnStartup", "false");
+    }
 
     public Task InitializeAsync() => ExecuteDbAsync(db => db.Database.MigrateAsync());
 
