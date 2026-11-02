@@ -16,14 +16,14 @@ var app = builder.Build();
 // `dotnet run -- seed [count]` recreates the demo data and exits without starting the server
 if (args is ["seed", ..])
 {
-    if (args.Length > 1 && !int.TryParse(args[1], CultureInfo.InvariantCulture, out _))
+    var count = DataSeeder.DefaultCount;
+    if (args.Length > 1 && (!int.TryParse(args[1], CultureInfo.InvariantCulture, out count) || count < 0))
     {
-        Console.Error.WriteLine("Usage: seed [count]");
+        Console.Error.WriteLine("Usage: seed [count], where count is zero or more");
         Environment.ExitCode = 1;
         return;
     }
 
-    var count = args.Length > 1 ? int.Parse(args[1], CultureInfo.InvariantCulture) : DataSeeder.DefaultCount;
     await DatabaseInitializer.ReseedAsync(app.Services, count, CancellationToken.None);
     return;
 }
