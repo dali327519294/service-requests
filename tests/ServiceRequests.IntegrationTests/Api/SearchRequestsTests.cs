@@ -157,6 +157,19 @@ public class SearchRequestsTests(ApiFactory factory) : IClassFixture<ApiFactory>
             error => error.Name.Equals(field, StringComparison.OrdinalIgnoreCase));
     }
 
+    [Theory]
+    [InlineData("createdFrom=2026-04-01T00:00:00", "CreatedFrom")]
+    [InlineData("createdTo=2026-04-01", "CreatedTo")]
+    public async Task Date_without_an_offset_returns_400(string queryString, string field)
+    {
+        var response = await factory.CreateClient().GetAsync("/api/requests?" + queryString);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Contains(json.RootElement.GetProperty("errors").EnumerateObject(),
+            error => error.Name.Equals(field, StringComparison.OrdinalIgnoreCase));
+    }
+
     [Fact]
     public async Task Get_by_id_returns_details_with_rowversion_allowed_transitions_and_utc_dates()
     {

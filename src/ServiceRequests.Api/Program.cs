@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using ServiceRequests.Api.ErrorHandling;
 using ServiceRequests.Api.Identity;
 using ServiceRequests.Api.Logging;
+using ServiceRequests.Api.ModelBinding;
 using ServiceRequests.Application;
 using ServiceRequests.Application.Common;
 using ServiceRequests.Infrastructure;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Enums travel as names ("InProgress"), both in controller responses and in ProblemDetails
-builder.Services.AddControllers()
+builder.Services.AddControllers(options => options.ModelBinderProviders.Insert(0, new OffsetRequiredDateTimeOffsetBinderProvider()))
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
     .ConfigureApiBehaviorOptions(options =>
     {
