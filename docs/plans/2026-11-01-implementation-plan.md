@@ -593,7 +593,7 @@ if any Updated: SummaryCache.Invalidate(); log summary
 - [ ] **Step 1:** README – מה המערכת, דרישות (SDK 10, Node, LocalDB), הרצה ב-3 פקודות, משתמשי דמו, בדיקות, שתי ההחלטות המרכזיות, טבלת מגבלות (השפעה שנמדדה / תיקון / הערכה), שיפורים, קישורים.
 - [ ] **Step 2:** `REVIEWER_GUIDE.md` – Traceability Matrix (סעיף → איך רואים → קוד → בדיקה → תיעוד), 3–4 צילומי מסך, פתרון תקלות מתוך מה שנתקלנו בו.
 - [ ] **Step 3:** ADRs: SQL Server; N-Layer; rowVersion בגוף הבקשה; Partial Success + שמירה מרוכזת; HybridCache + Generation Key; JWT + Roles; .NET 10.
-- [ ] **Step 4:** `DEPLOYMENT_GCP.md` (Cloud Run, Cloud SQL, Memorystore, Secret Manager, Pipeline של CD); `AI_USAGE.md` (מה הכלי עשה / מה החלטתי / מה בדקתי, החלטות שבהן שיניתי את ההמלצה, הכלל לגבי פתרון ההשוואה, רשימת בעיות שנמצאו ותוקנו); `WORK_PLAN.md` (הטבלה מהתוכנית + שעות בפועל + לקחים).
+- [ ] **Step 4:** `DEPLOYMENT_GCP.md` (Cloud Run, Cloud SQL, Memorystore, Secret Manager, Pipeline של CD); `AI_USAGE.md` (מה הכלי עשה / מה החלטתי / מה בדקתי, החלטות שבהן שיניתי את ההמלצה, רשימת בעיות שנמצאו ותוקנו); `WORK_PLAN.md` (הטבלה מהתוכנית + שעות בפועל + לקחים).
 - [ ] **Step 5: Commit** – commit לכל מסמך (`Add reviewer guide`, `Add architecture decision records` …).
 
 ### Task 22: אימות סופי
