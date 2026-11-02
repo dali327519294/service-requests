@@ -10,4 +10,5 @@ public static class FieldLengths
     public const int Search = 100;
     public const int UserName = 50;
     public const int DisplayName = 100;
+    public const int PasswordHash = 200;
 }
