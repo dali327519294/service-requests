@@ -12,8 +12,8 @@ public static class DependencyInjection
     {
         // Interceptors registered elsewhere (e.g. by tests) are picked up without changing this method
         services.AddDbContext<ServiceRequestsDbContext>((sp, options) => options
-            .UseSqlServer(configuration.GetConnectionString("ServiceRequests")
-                ?? throw new InvalidOperationException("Connection string 'ServiceRequests' is missing."))
+            .UseSqlServer(configuration.GetConnectionString("ServiceRequestsDb")
+                ?? throw new InvalidOperationException("Connection string 'ServiceRequestsDb' is missing."))
             .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>()));
         return services;
     }
