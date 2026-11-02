@@ -13,7 +13,7 @@
 | 3 | Domain: ישויות ומעברי סטטוס | 1 | 1.5 | ~0.5 | Self-review מצא 3 בעיות, תוקנו ב-TDD |
 | 4 | Infrastructure: DbContext, אינדקסים, Migration, תשתית בדיקות | 2 | 2 | 1 | LocalDB הותקן מראש; פרצת אבטחה בספרייה עקיפה |
 | 5 | Seed: 100,000 פניות, יצירה חוזרת | 2 | 2 | 1 | 100,000 פניות ב-15.6 שניות; פיצול 98.7% → 0% |
-| 6 | שלד API: שגיאות, JSON, Health, Logging, ICurrentUser | 2 | 1.5 | | |
+| 6 | שלד API: שגיאות, JSON, Health, Logging, ICurrentUser | 2 | 1.5 | 0.5 | |
 | 7 | שליפה: חיפוש, סינון, מיון, דפדוף, פנייה בודדת | 2 | 3 | | |
 | 8 | סיכום Faceted ו-Cache | 3 | 2 | | |
 | 9 | עדכון סטטוס, Concurrency, Audit והיסטוריה | 3 | 3 | | |
