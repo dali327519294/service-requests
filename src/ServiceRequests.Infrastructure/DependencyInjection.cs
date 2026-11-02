@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using ServiceRequests.Infrastructure.Persistence;
+using ServiceRequests.Infrastructure.Persistence.Seeding;
 
 namespace ServiceRequests.Infrastructure;
 
@@ -15,6 +17,8 @@ public static class DependencyInjection
             .UseSqlServer(configuration.GetConnectionString("ServiceRequestsDb")
                 ?? throw new InvalidOperationException("Connection string 'ServiceRequestsDb' is missing."))
             .AddInterceptors(sp.GetServices<ISaveChangesInterceptor>()));
+        services.AddScoped<DataSeeder>();
+        services.TryAddSingleton(TimeProvider.System);
         return services;
     }
 }
