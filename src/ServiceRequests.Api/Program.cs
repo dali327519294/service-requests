@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using ServiceRequests.Api.ErrorHandling;
 using ServiceRequests.Api.Identity;
+using ServiceRequests.Api.Logging;
+using ServiceRequests.Application;
 using ServiceRequests.Application.Common;
 using ServiceRequests.Infrastructure;
 using ServiceRequests.Infrastructure.Persistence;
@@ -13,13 +15,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Enums travel as names ("InProgress"), both in controller responses and in ProblemDetails
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Validation failures are logged with the field names only, never the values the client sent
+        var createProblem = options.InvalidModelStateResponseFactory;
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            Log.ValidationFailed(logger, string.Join(", ", context.ModelState.Where(e => e.Value?.Errors.Count > 0).Select(e => e.Key)));
+            return createProblem(context);
+        };
+    });
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HeaderCurrentUser>();
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHealthChecks().AddDbContextCheck<ServiceRequestsDbContext>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
