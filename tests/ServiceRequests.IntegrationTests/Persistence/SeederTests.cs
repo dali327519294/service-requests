@@ -92,6 +92,21 @@ public class SeederTests(ApiFactory factory) : IClassFixture<ApiFactory>
         });
     }
 
+    [Fact]
+    public async Task Seed_keeps_constraints_trusted()
+    {
+        await SeedAsync(500);
+
+        List<string> untrusted = [];
+        await factory.ExecuteDbAsync(async db => untrusted = await db.Database.SqlQuery<string>($"""
+            SELECT name AS Value FROM sys.check_constraints WHERE is_not_trusted = 1
+            UNION ALL
+            SELECT name FROM sys.foreign_keys WHERE is_not_trusted = 1
+            """).ToListAsync());
+
+        Assert.Empty(untrusted);
+    }
+
     private Task SeedAsync(int count) => factory.ExecuteDbAsync(db =>
         new DataSeeder(db, FixedTime, NullLogger<DataSeeder>.Instance).SeedAsync(count, CancellationToken.None));
 

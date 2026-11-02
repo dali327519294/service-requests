@@ -41,8 +41,12 @@ public sealed partial class DataSeeder(ServiceRequestsDbContext db, TimeProvider
 
             var connection = (SqlConnection)db.Database.GetDbConnection();
             var sqlTransaction = (SqlTransaction)transaction.GetDbTransaction();
-            await BulkInsertAsync(connection, sqlTransaction, "Requests", requests, SqlBulkCopyOptions.KeepIdentity, ct);
-            await BulkInsertAsync(connection, sqlTransaction, "RequestStatusHistory", history, SqlBulkCopyOptions.Default, ct);
+            // CheckConstraints: by default SqlBulkCopy skips CHECK and FK validation and marks them untrusted,
+            // which also stops the query optimizer from relying on them
+            await BulkInsertAsync(connection, sqlTransaction, "Requests", requests,
+                SqlBulkCopyOptions.KeepIdentity | SqlBulkCopyOptions.CheckConstraints, ct);
+            await BulkInsertAsync(connection, sqlTransaction, "RequestStatusHistory", history,
+                SqlBulkCopyOptions.CheckConstraints, ct);
 
             // Requests were inserted with explicit ids; new ones created through the API continue after them
             var reseed = string.Create(CultureInfo.InvariantCulture, $"DBCC CHECKIDENT ('Requests', RESEED, {requestCount})");
