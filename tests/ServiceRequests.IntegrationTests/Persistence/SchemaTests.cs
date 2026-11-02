@@ -15,7 +15,11 @@ public class SchemaTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         // The column comes from InlineData above, never from user input
         var sql = $"UPDATE Requests SET {column} = 9 WHERE Id = {request.Id}";
-        await factory.ExecuteDbAsync(db => Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlRawAsync(sql)));
+        await factory.ExecuteDbAsync(async db =>
+        {
+            var ex = await Assert.ThrowsAsync<SqlException>(() => db.Database.ExecuteSqlRawAsync(sql));
+            Assert.Contains($"CK_Requests_{column}", ex.Message, StringComparison.Ordinal);
+        });
     }
 
     [Fact]
