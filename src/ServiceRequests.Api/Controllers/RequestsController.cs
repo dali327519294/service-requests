@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using ServiceRequests.Api.Logging;
+using ServiceRequests.Application.Requests.Commands;
 using ServiceRequests.Application.Requests.Contracts;
 using ServiceRequests.Application.Requests.Querying;
 using ServiceRequests.Application.Requests.Summary;
@@ -7,7 +9,8 @@ namespace ServiceRequests.Api.Controllers;
 
 [ApiController]
 [Route("api/requests")]
-public sealed class RequestsController(RequestQueryService queries, RequestSummaryService summaries) : ControllerBase
+public sealed class RequestsController(RequestQueryService queries, RequestSummaryService summaries,
+    RequestStatusService statuses, ILogger<RequestsController> logger) : ControllerBase
 {
     /// <summary>Searches, filters, sorts and pages the requests.</summary>
     [HttpGet]
@@ -23,4 +26,44 @@ public sealed class RequestsController(RequestQueryService queries, RequestSumma
     [HttpGet("{id:int}")]
     public async Task<ActionResult<RequestDetailsDto>> GetById(int id, CancellationToken ct) =>
         await queries.GetByIdAsync(id, ct) is { } request ? request : NotFound();
+
+    /// <summary>
+    /// Changes the status. The body carries the rowVersion the client saw; if the request changed since,
+    /// the answer is 409 with its current state, so the client can show it without another GET.
+    /// </summary>
+    [HttpPatch("{id:int}/status")]
+    public async Task<ActionResult<RequestDetailsDto>> UpdateStatus(int id, UpdateStatusRequest update, CancellationToken ct)
+    {
+        var outcome = await statuses.UpdateStatusAsync(id, update, ct);
+        switch (outcome)
+        {
+            case UpdateStatusOutcome.Updated updated:
+                Log.StatusChanged(logger, id, updated.PreviousStatus, updated.Request.Status);
+                return updated.Request;
+            case UpdateStatusOutcome.NotFound:
+                return NotFound();
+            case UpdateStatusOutcome.Conflict conflict:
+                Log.StatusConflict(logger, id);
+                return ProblemWith(StatusCodes.Status409Conflict, "The request was changed by someone else.",
+                    "Review its current state and try again.", "current", conflict.Current);
+            case UpdateStatusOutcome.InvalidTransition invalid:
+                return ProblemWith(StatusCodes.Status400BadRequest, "The status change is not allowed.",
+                    $"A request in status {invalid.From} cannot move to {invalid.To}.", "allowedTransitions", invalid.Allowed);
+            default:
+                throw new InvalidOperationException($"Unhandled outcome {outcome.GetType().Name}.");
+        }
+    }
+
+    /// <summary>The status changes of one request, newest first.</summary>
+    [HttpGet("{id:int}/history")]
+    public async Task<ActionResult<IReadOnlyList<StatusHistoryDto>>> History(int id, CancellationToken ct) =>
+        await queries.GetHistoryAsync(id, ct) is { } history ? Ok(history) : NotFound();
+
+    // ProblemDetails from the framework factory (it adds traceId), plus the one field the client acts on
+    private ObjectResult ProblemWith(int status, string title, string detail, string extension, object value)
+    {
+        var problem = ProblemDetailsFactory.CreateProblemDetails(HttpContext, status, title, detail: detail);
+        problem.Extensions[extension] = value;
+        return new ObjectResult(problem) { StatusCode = status };
+    }
 }
