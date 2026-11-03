@@ -57,7 +57,7 @@ tools/
 docs/
 ```
 
-**כיוון התלויות:** `Api → Application → Infrastructure → Domain`, ו-`Application → Domain`. ההפרדה נאכפת על ידי הקומפיילר: פרויקט Api לא מכיר את Infrastructure, ולכן Controller לא יכול לגשת ל-DbContext.
+**כיוון התלויות:** `Api → Application → Infrastructure → Domain`, ו-`Application → Domain`. ל-Api יש הפניה גם ל-Infrastructure, אבל רק `Program.cs` משתמש בה (Composition Root): רישום השירותים, אתחול בסיס הנתונים ו-Health Check. ה-Controllers לא ניגשים ל-`DbContext` ועובדים רק מול ה-Services של Application. זו מוסכמה שנבדקת ב-Review, והקומפיילר לא אוכף אותה.
 
 **בלי Repository Pattern:** ה-DbContext כבר מממש Repository ו-Unit of Work. ה-Services ב-Application משתמשים בו ישירות.
 
@@ -112,7 +112,7 @@ docs/
 - **התפלגות מציאותית:** סטטוסים לא אחידים (למשל 10% New, 40% InProgress, 15% Waiting, 35% Completed), כ-200 ארגונים, כ-30 מטפלים, תאריכים על פני שנתיים; היסטוריה עקבית עם הסטטוס הנוכחי.
 - **נתונים בדיוניים בעברית** – שמות ארגונים, כותרות ומטפלים – שמתאימים לממשק.
 - **משתמשים לדוגמה** מכל תפקיד, עם סיסמאות שמתועדות ב-README (לפיתוח בלבד).
-- **הרצה:** בהרצה הראשונה, אם הטבלה ריקה – Migrations ו-Seed אוטומטית. יצירה חוזרת: `dotnet run --project src/ServiceRequests.Api -- seed --reset [count]`.
+- **הרצה:** בהרצה הראשונה, אם הטבלה ריקה – Migrations ו-Seed אוטומטית. יצירה חוזרת (מחליפה את כל הנתונים הקיימים): `dotnet run --project src/ServiceRequests.Api -- seed [count]`.
 - **אחרי הטעינה:** בדיקת מצב האינדקסים (Fragmentation) – ממצא יתועד ויטופל אם צריך.
 
 ---
