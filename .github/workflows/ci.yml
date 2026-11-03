@@ -69,3 +69,35 @@ jobs:
           name: backend-test-results
           path: TestResults
           if-no-files-found: ignore
+
+  frontend:
+    name: Frontend lint, tests & build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: src/service-requests-ui
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/service-requests-ui/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Format
+        run: npx prettier --check .
+
+      - name: Lint
+        run: npx ng lint
+
+      - name: Test
+        run: npx ng test --watch=false
+
+      - name: Build
+        run: npx ng build
