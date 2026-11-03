@@ -50,6 +50,42 @@ public class SummaryCacheTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task Bulk_update_invalidates_cached_summary()
+    {
+        Cache.Invalidate();
+        var request = await TestData.AddRequestAsync(factory, status: RequestStatus.InProgress);
+        var client = UserClient();
+        var before = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+
+        await client.PostAsJsonAsync("/api/requests/bulk-status", new
+        {
+            status = "Completed",
+            items = new[] { new { id = request.Id, rowVersion = RowVersionCodec.Encode(request.RowVersion) } },
+        });
+        var after = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+
+        Assert.Equal(before.ByStatus[RequestStatus.Completed] + 1, after.ByStatus[RequestStatus.Completed]);
+    }
+
+    [Fact]
+    public async Task Bulk_with_no_success_keeps_the_cached_summary()
+    {
+        Cache.Invalidate();
+        var client = UserClient();
+        var before = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+        await TestData.AddRequestAsync(factory);   // straight to the database: only an invalidation would reveal it
+
+        await client.PostAsJsonAsync("/api/requests/bulk-status", new
+        {
+            status = "Completed",
+            items = new[] { new { id = 999999, rowVersion = RowVersionCodec.Encode(new byte[8]) } },
+        });
+        var after = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+
+        Assert.Equal(before.Total, after.Total);   // nothing changed, so the cache was not thrown away
+    }
+
+    [Fact]
     public async Task Value_computed_during_invalidation_is_not_served()
     {
         Cache.Invalidate();
@@ -75,6 +111,13 @@ public class SummaryCacheTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(2, calls);        // the old value was not reused
         Assert.Equal(2, next.Total);
+    }
+
+    private HttpClient UserClient()
+    {
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-User-Name", "dana");
+        return client;
     }
 
     private static RequestSummaryDto Summary(int total) => new(total,
