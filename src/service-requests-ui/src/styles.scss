@@ -1,0 +1,69 @@
+// Design tokens and global styles. Components read these variables, never raw colors.
+@use '@angular/material' as mat;
+@use './theme-colors' as palettes;
+
+html {
+  height: 100%;
+  // Light by default, dark when the operating system asks for it
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: palettes.$primary-palette,
+        tertiary: palettes.$tertiary-palette,
+      ),
+      typography: (
+        'Rubik Variable',
+        sans-serif,
+      ),
+      density: 0,
+    )
+  );
+
+  // Shape and layout
+  --app-radius: 12px;
+  --app-content-width: 1280px;
+  // Every chip in a column has the same width, whatever the word inside it
+  --app-status-chip-width: 96px;
+  --app-priority-chip-width: 80px;
+
+  // Status colors: background and text pairs that pass AA contrast in both modes
+  --app-status-new-bg: light-dark(#e6f1fb, #0c447c);
+  --app-status-new-fg: light-dark(#0c447c, #e6f1fb);
+  --app-status-in-progress-bg: light-dark(#faeeda, #633806);
+  --app-status-in-progress-fg: light-dark(#633806, #faeeda);
+  --app-status-waiting-bg: light-dark(#eeedfe, #3c3489);
+  --app-status-waiting-fg: light-dark(#3c3489, #eeedfe);
+  --app-status-completed-bg: light-dark(#e1f5ee, #085041);
+  --app-status-completed-fg: light-dark(#085041, #e1f5ee);
+  --app-priority-high-fg: light-dark(#a32d2d, #f09595);
+}
+
+// Users who ask the system for more contrast get it
+@media (prefers-contrast: more) {
+  html {
+    @include palettes.high-contrast-overrides(color-scheme);
+  }
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+// Keyboard users always see where they are
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
+}

@@ -1,0 +1,17 @@
+<a class="skip-link" href="#main">{{ labels.skipToContent }}</a>
+
+<header class="top-bar">
+  <div class="top-bar__inner">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true"><mat-icon>eco</mat-icon></span>
+      <span class="brand__text">
+        <span class="brand__title">{{ labels.appTitle }}</span>
+        <span class="brand__subtitle">{{ labels.appSubtitle }}</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="content" tabindex="-1">
+  <router-outlet />
+</main>
