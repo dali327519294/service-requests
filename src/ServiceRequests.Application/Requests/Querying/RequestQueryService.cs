@@ -43,8 +43,9 @@ public sealed class RequestQueryService(ServiceRequestsDbContext db)
 
         return await db.StatusHistory.AsNoTracking()
             .Where(h => h.RequestId == id)
-            .OrderByDescending(h => h.ChangedAt)
-            .ThenByDescending(h => h.Id)   // keeps changes from the same millisecond in order
+            // Id is the order the changes were saved in: changes to one request are serialized by the rowversion check,
+            // while ChangedAt comes from the clock of whichever server made the change
+            .OrderByDescending(h => h.Id)
             .Select(h => new StatusHistoryDto(h.PreviousStatus, h.NewStatus, h.ChangedAt, h.ChangedBy))
             .ToListAsync(ct);
     }

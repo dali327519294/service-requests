@@ -30,6 +30,25 @@ public class HistoryTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task History_follows_the_order_of_changes_even_if_clocks_disagree()
+    {
+        var request = await TestData.AddRequestAsync(factory, status: RequestStatus.Waiting);
+        var noon = new DateTime(2026, 11, 3, 12, 0, 0, DateTimeKind.Utc);
+        // The second change was saved later but stamped earlier, as by a server whose clock runs behind
+        await factory.ExecuteDbAsync(async db =>
+        {
+            db.StatusHistory.Add(new RequestStatusHistory(request.Id, RequestStatus.New, RequestStatus.InProgress, noon, "dana"));
+            await db.SaveChangesAsync();
+            db.StatusHistory.Add(new RequestStatusHistory(request.Id, RequestStatus.InProgress, RequestStatus.Waiting, noon.AddSeconds(-5), "avi"));
+            await db.SaveChangesAsync();
+        });
+
+        var history = (await factory.CreateClient().GetFromJsonAsync<List<StatusHistoryDto>>($"/api/requests/{request.Id}/history", Json))!;
+
+        Assert.Equal([RequestStatus.Waiting, RequestStatus.InProgress], history.Select(h => h.NewStatus));
+    }
+
+    [Fact]
     public async Task History_of_unchanged_request_is_empty()
     {
         var request = await TestData.AddRequestAsync(factory);
