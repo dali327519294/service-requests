@@ -1,4 +1,4 @@
-<a class="skip-link" href="#main">{{ labels.skipToContent }}</a>
+<a class="skip-link" href="#main" (click)="skipToMain($event)">{{ labels.skipToContent }}</a>
 
 <header class="top-bar">
   <div class="top-bar__inner">
@@ -12,6 +12,6 @@
   </div>
 </header>
 
-<main id="main" class="content" tabindex="-1">
+<main #main id="main" class="content" tabindex="-1">
   <router-outlet />
 </main>
