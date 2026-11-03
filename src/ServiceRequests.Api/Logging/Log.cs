@@ -21,6 +21,9 @@ internal static partial class Log
     [LoggerMessage(Level = LogLevel.Information, Message = "Request {RequestId} status update conflicted with a newer version")]
     public static partial void StatusConflict(ILogger logger, int requestId);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Bulk status update: {Requested} requested, {Succeeded} updated, {Failed} failed")]
+    public static partial void BulkStatusUpdated(ILogger logger, int requested, int succeeded, int failed);
+
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception, trace id {TraceId}")]
     public static partial void UnhandledException(ILogger logger, Exception exception, string traceId);
 }

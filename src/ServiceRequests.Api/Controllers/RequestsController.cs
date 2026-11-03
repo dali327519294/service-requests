@@ -54,6 +54,18 @@ public sealed class RequestsController(RequestQueryService queries, RequestSumma
         }
     }
 
+    /// <summary>
+    /// Changes the status of up to 100 requests. Each request gets its own outcome, in the order of the request,
+    /// and the answer is 200 even when none succeeded. A malformed batch is rejected whole with 400.
+    /// </summary>
+    [HttpPost("bulk-status")]
+    public async Task<BulkUpdateResult> BulkUpdateStatus(BulkUpdateStatusRequest bulk, CancellationToken ct)
+    {
+        var result = await statuses.BulkUpdateAsync(bulk, ct);
+        Log.BulkStatusUpdated(logger, result.Requested, result.Succeeded, result.Failed);
+        return result;
+    }
+
     /// <summary>The status changes of one request, newest first.</summary>
     [HttpGet("{id:int}/history")]
     public async Task<ActionResult<IReadOnlyList<StatusHistoryDto>>> History(int id, CancellationToken ct) =>
