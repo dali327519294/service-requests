@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using ServiceRequests.Application.Requests;
 using ServiceRequests.Application.Requests.Contracts;
 using ServiceRequests.Application.Requests.Summary;
 using ServiceRequests.Domain.Requests;
@@ -31,8 +32,22 @@ public class SummaryCacheTests(ApiFactory factory) : IClassFixture<ApiFactory>
         Assert.Equal(first.Total + 1, list.TotalCount);   // the row is really there
     }
 
-    [Fact(Skip = "Enabled in Task 9, when the status update endpoint exists")]
-    public Task Status_update_invalidates_cached_summary() => Task.CompletedTask;
+    [Fact]
+    public async Task Status_update_invalidates_cached_summary()
+    {
+        Cache.Invalidate();
+        var request = await TestData.AddRequestAsync(factory, status: RequestStatus.InProgress);
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-User-Name", "dana");
+        var before = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+
+        await client.PatchAsJsonAsync($"/api/requests/{request.Id}/status",
+            new { status = "Completed", rowVersion = RowVersionCodec.Encode(request.RowVersion) });
+        var after = (await client.GetFromJsonAsync<RequestSummaryDto>("/api/requests/summary", Json))!;
+
+        Assert.Equal(before.ByStatus[RequestStatus.InProgress] - 1, after.ByStatus[RequestStatus.InProgress]);
+        Assert.Equal(before.ByStatus[RequestStatus.Completed] + 1, after.ByStatus[RequestStatus.Completed]);
+    }
 
     [Fact]
     public async Task Value_computed_during_invalidation_is_not_served()

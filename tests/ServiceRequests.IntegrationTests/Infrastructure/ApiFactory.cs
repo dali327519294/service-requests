@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceRequests.Application.Common;
 using ServiceRequests.Infrastructure.Persistence;
@@ -19,7 +20,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("ConnectionStrings:ServiceRequestsDb", _connectionString);
         // Tests seed exactly the data they need; 100,000 demo rows per test class would only slow them down
         builder.UseSetting("Database:InitializeOnStartup", "false");
-        builder.ConfigureServices(services => services.AddTransient<IStartupFilter, TestEndpoints>());
+        builder.ConfigureServices(services =>
+        {
+            services.AddTransient<IStartupFilter, TestEndpoints>();
+            // Lets a test force "another user saved first" between a request's read and its write
+            services.AddSingleton(new RaceInjector(_connectionString));
+            services.AddSingleton<ISaveChangesInterceptor>(sp => sp.GetRequiredService<RaceInjector>());
+        });
     }
 
     public Task InitializeAsync() => ExecuteDbAsync(db => db.Database.MigrateAsync());

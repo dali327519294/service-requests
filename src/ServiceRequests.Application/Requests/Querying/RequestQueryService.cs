@@ -30,12 +30,23 @@ public sealed class RequestQueryService(ServiceRequestsDbContext db)
         return new PagedResult<RequestListItemDto>(items, query.Page, query.PageSize, totalCount);
     }
 
-    public async Task<RequestDetailsDto?> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<RequestDetailsDto?> GetByIdAsync(int id, CancellationToken ct) =>
+        (await db.Requests.AsNoTracking().SingleOrDefaultAsync(r => r.Id == id, ct))?.ToDetails();
+
+    /// <summary>Newest first. Null when the request does not exist; an empty list means it never changed.</summary>
+    public async Task<IReadOnlyList<StatusHistoryDto>?> GetHistoryAsync(int id, CancellationToken ct)
     {
-        var request = await db.Requests.AsNoTracking().SingleOrDefaultAsync(r => r.Id == id, ct);
-        return request is null ? null : new RequestDetailsDto(request.Id, request.Title, request.OrganizationName,
-            request.Status, request.Priority, request.AssignedTo, request.CreatedAt, request.UpdatedAt,
-            RowVersionCodec.Encode(request.RowVersion), StatusTransitions.AllowedFrom(request.Status));
+        if (!await db.Requests.AnyAsync(r => r.Id == id, ct))
+        {
+            return null;
+        }
+
+        return await db.StatusHistory.AsNoTracking()
+            .Where(h => h.RequestId == id)
+            .OrderByDescending(h => h.ChangedAt)
+            .ThenByDescending(h => h.Id)   // keeps changes from the same millisecond in order
+            .Select(h => new StatusHistoryDto(h.PreviousStatus, h.NewStatus, h.ChangedAt, h.ChangedBy))
+            .ToListAsync(ct);
     }
 
     private static IOrderedQueryable<ServiceRequest> Sort(IQueryable<ServiceRequest> requests, RequestSortField field, SortDirection direction)
