@@ -105,17 +105,19 @@ namespace ServiceRequests.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt")
-                        .IsDescending();
-
                     b.HasIndex("OrganizationName");
 
                     b.HasIndex("AssignedTo", "Status");
 
-                    b.HasIndex("Status", "CreatedAt")
-                        .IsDescending(false, true);
+                    b.HasIndex("CreatedAt", "Id")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Requests_CreatedAt");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status", "CreatedAt"), new[] { "Priority" });
+                    b.HasIndex("Status", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Requests_Status_CreatedAt");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status", "CreatedAt", "Id"), new[] { "Priority" });
 
                     b.ToTable("Requests", null, t =>
                         {

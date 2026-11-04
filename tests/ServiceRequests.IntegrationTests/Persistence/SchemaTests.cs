@@ -70,10 +70,12 @@ public class SchemaTests(ApiFactory factory) : IClassFixture<ApiFactory>
             GROUP BY i.name
             """).ToListAsync());
 
+        // The list sorts by (CreatedAt, Id) with Id breaking ties; an index serves that order only when Id is part
+        // of its key in the same direction (docs/PERFORMANCE.md). Left out, SQL Server appends Id ascending.
         var expected = new HashSet<string>
         {
-            "IX_Requests_CreatedAt: CreatedAt DESC",
-            "IX_Requests_Status_CreatedAt: Status, CreatedAt DESC, Priority INCLUDE",
+            "IX_Requests_CreatedAt: CreatedAt DESC, Id DESC",
+            "IX_Requests_Status_CreatedAt: Status, CreatedAt DESC, Id DESC, Priority INCLUDE",
             "IX_Requests_AssignedTo_Status: AssignedTo, Status",
             "IX_Requests_OrganizationName: OrganizationName",
             "IX_RequestStatusHistory_RequestId_ChangedAt: RequestId, ChangedAt DESC",
