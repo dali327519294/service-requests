@@ -15,6 +15,7 @@ export const labels = {
   searchPlaceholder: 'חיפוש לפי כותרת או שם ארגון',
   moreFilters: 'סינון נוסף',
   priority: 'עדיפות',
+  priorityLevel: 'רמת עדיפות',
   organizationStartsWith: 'שם הארגון',
   assignedTo: 'מטפל/ת',
   createdRange: 'תאריך יצירה',

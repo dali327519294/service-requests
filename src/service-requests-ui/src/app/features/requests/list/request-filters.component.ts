@@ -10,11 +10,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import { RequestPriority, RequestQuery } from '../../../core/api/models';
 import { REQUEST_PRIORITIES } from '../../../core/api/request-enums';
@@ -27,7 +28,7 @@ import { addDays } from './query-params';
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
-    MatButtonToggleModule,
+    MatSelectModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatIconModule,

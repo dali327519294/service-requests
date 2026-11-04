@@ -27,16 +27,14 @@
 
   @if (open()) {
     <div id="more-filters" class="filters__panel">
-      <mat-button-toggle-group
-        formControlName="priority"
-        multiple
-        class="filters__priority"
-        [attr.aria-label]="labels.priority"
-      >
-        @for (p of priorities; track p) {
-          <mat-button-toggle [value]="p">{{ priorityLabel[p] }}</mat-button-toggle>
-        }
-      </mat-button-toggle-group>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ labels.priorityLevel }}</mat-label>
+        <mat-select formControlName="priority" multiple>
+          @for (p of priorities; track p) {
+            <mat-option [value]="p">{{ priorityLabel[p] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ labels.organizationStartsWith }}</mat-label>
         <input matInput formControlName="organizationName" maxlength="200" />

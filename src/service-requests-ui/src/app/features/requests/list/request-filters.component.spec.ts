@@ -64,7 +64,9 @@ describe('RequestFilters', () => {
     el.querySelector<HTMLButtonElement>('[aria-controls=more-filters]')!.click();
     fixture.detectChanges();
 
-    el.querySelectorAll<HTMLButtonElement>('mat-button-toggle button')[2].click();
+    el.querySelector<HTMLElement>('mat-select')!.click();
+    fixture.detectChanges();
+    document.querySelectorAll<HTMLElement>('mat-option')[2].click();
 
     expect(emitted).toEqual([{ priority: ['High'] }]);
   });

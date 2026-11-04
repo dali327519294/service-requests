@@ -23,25 +23,19 @@
   font-variant-numeric: tabular-nums;
 }
 
+// One row of four fields of the same size: priority, organization, assignee and dates
 .filters__panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
-// The priorities get a row of their own: squeezed into a grid cell, the buttons would shrink unevenly
-.filters__priority {
-  grid-column: 1 / -1;
-  justify-self: start;
-}
-
-// Every priority button has the same width, whatever the word and whether it shows the check mark
-.filters__priority mat-button-toggle {
-  flex: 0 0 var(--app-priority-toggle-width);
-  box-sizing: border-box; // the divider between toggles counts inside the width
+@media (max-width: 900px) {
+  .filters__panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 600px) {
