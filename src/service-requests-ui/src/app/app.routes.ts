@@ -9,5 +9,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/requests/list/requests-list-page').then((m) => m.RequestsListPage),
   },
+  {
+    path: 'requests/:id',
+    title: pageTitle(labels.requestTitle),
+    loadComponent: () =>
+      import('./features/requests/details/request-details-page').then((m) => m.RequestDetailsPage),
+  },
   { path: '**', redirectTo: 'requests' },
 ];
