@@ -94,7 +94,7 @@
 
 **למה `Id` חייב להיות במפתח:** כל מיון ברשימה מסתיים ב-`Id` באותו כיוון, כדי ששורות עם אותו תאריך לא יופיעו בשני עמודים או באף אחד. אינדקס מחזיר שורות ממוינות רק אם הסדר שלו תואם בדיוק. כש-`Id` לא מוגדר, SQL Server מוסיף אותו לסוף בסדר עולה. אז `CreatedAt DESC, Id DESC` לא תואם, וגם בקריאה לאחור לא: הסדר שמתקבל הוא `CreatedAt ASC, Id DESC`. הבדיקה `Indexes_match_the_spec` מוודאת את המבנה הזה.
 
-**פיצול (Fragmentation) אחרי ה-Seed:** בכל האינדקסים 0–2.3%, והדפים מלאים ב-98.6–99.6%. ה-Seed מכניס את השורות בסדר המפתח, ולכן אין פיצול שדורש Rebuild.
+**פיצול (Fragmentation) אחרי ה-Seed:** המפתח הראשי 0.1%, `IX_Requests_AssignedTo_Status` 2.3%, `IX_Requests_OrganizationName` 0%, והדפים מלאים ב-98.6–99.6%. ה-Seed מכניס את השורות בסדר המפתח, ולכן אין פיצול שדורש Rebuild. שני אינדקסי הרשימה נבנו מחדש ב-`MatchListIndexesToSortOrder` לפני המדידה, ולכן ה-0–1.7% שלהם לא מעיד על ה-Seed.
 
 **Filtered Index (`WHERE Status <> 4`), נבדק ולא נוסף.** ההשערה הייתה שאינדקס רק על פניות שלא הושלמו (65% מהשורות) יחסוך קריאות. אבל אף שאילתה במערכת לא מסננת "הכל חוץ מהושלמו":
 - סינון לפי סטטוס כבר עושה Seek ל-103 דפים.
@@ -115,8 +115,9 @@
 ## איך להריץ שוב
 
 ```powershell
-# מול בסיס הנתונים המקומי, אחרי Seed. קורא בלבד; העדכון בתוך measure.sql מבוטל ב-ROLLBACK
-.\docs\performance\measure.ps1 -Label after-fix
+# מול בסיס הנתונים המקומי, אחרי Seed. קורא בלבד; העדכון בתוך measure.sql מבוטל ב-ROLLBACK.
+# Bypass מתיר את הסקריפט להרצה הזו בלבד: ברירת המחדל ב-Windows (Restricted) חוסמת סקריפטים
+powershell -ExecutionPolicy Bypass -File docs\performance\measure.ps1 -Label after-fix
 ```
 
 התוצאות נשמרות ב-`performance/results-<label>.json`, ותוכניות הריצה ב-`performance/plans/<label>/`.

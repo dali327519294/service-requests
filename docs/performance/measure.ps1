@@ -2,7 +2,8 @@
   Runs every case of measure.sql against the local database and reports, per case and variant:
   logical reads, CPU and elapsed time (median of 5 warm runs), and the operators of the actual plan.
 
-  Usage (Windows PowerShell):  .\docs\performance\measure.ps1 -Label after-fix
+  Usage, from the repository root (Bypass allows this one run; Windows blocks scripts by default):
+    powershell -ExecutionPolicy Bypass -File docs\performance\measure.ps1 -Label after-fix
   Results go to results-<label>.json and the actual plans to plans/<label>/ (open them in SSMS).
   Nothing is changed: SELECTs only, and the UPDATE case is rolled back inside measure.sql.
 #>
