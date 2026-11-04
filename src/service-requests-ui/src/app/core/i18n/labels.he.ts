@@ -15,7 +15,7 @@ export const labels = {
   searchPlaceholder: 'חיפוש לפי כותרת או שם ארגון',
   moreFilters: 'סינון נוסף',
   priority: 'עדיפות',
-  organizationStartsWith: 'שם הארגון מתחיל ב',
+  organizationStartsWith: 'שם הארגון',
   assignedTo: 'מטפל/ת',
   createdRange: 'תאריך יצירה',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
