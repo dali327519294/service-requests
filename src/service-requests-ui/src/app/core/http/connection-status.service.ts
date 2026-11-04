@@ -9,10 +9,16 @@ export class ConnectionStatusService {
   readonly online = this.state.asReadonly();
 
   constructor() {
-    // The browser knows first when the network itself goes away
+    // The browser knows first when the network goes away or comes back. Coming back is only a hint:
+    // the API may still be down, so it triggers a health check rather than marking us online
     const goOffline = () => this.markOffline();
+    const checkAgain = () => this.retry();
     window.addEventListener('offline', goOffline);
-    inject(DestroyRef).onDestroy(() => window.removeEventListener('offline', goOffline));
+    window.addEventListener('online', checkAgain);
+    inject(DestroyRef).onDestroy(() => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', checkAgain);
+    });
   }
 
   markOnline(): void {
