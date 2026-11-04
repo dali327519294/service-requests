@@ -1,27 +1,26 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { PagedResult, RequestListItem, RequestQuery, SortField } from '../../../core/api/models';
-import { labels, priorityLabel, statusLabel } from '../../../core/i18n/labels.he';
-import { priorityIcon, statusIcon, statusToken } from '../../../core/ui/status-presentation';
-import { DEFAULTS, PAGE_SIZES } from './query-params';
-
-interface Row extends RequestListItem {
-  statusText: string;
-  statusIcon: string;
-  statusToken: string;
-  priorityText: string;
-  priorityIcon: string;
-}
+import { labels } from '../../../core/i18n/labels.he';
+import { PriorityChip, StatusChip } from '../../../core/ui/request-chips';
+import { DEFAULTS, PAGE_SIZES, toParams } from './query-params';
 
 /** One page of requests. Sorting and paging happen on the server, so the table only reports what the user asked for. */
 @Component({
   selector: 'app-requests-table',
-  imports: [DatePipe, MatIconModule, MatPaginatorModule, MatSortModule, MatTableModule, RouterLink],
+  imports: [
+    DatePipe,
+    MatPaginatorModule,
+    MatSortModule,
+    MatTableModule,
+    PriorityChip,
+    RouterLink,
+    StatusChip,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './requests-table.component.html',
   styleUrl: './requests-table.component.scss',
@@ -45,17 +44,8 @@ export class RequestsTable {
     'updatedAt',
   ];
 
-  // The cell templates are untyped (let r), so each row arrives with its display values ready
-  protected readonly rows = computed<Row[]>(() =>
-    this.result().items.map((item) => ({
-      ...item,
-      statusText: statusLabel[item.status],
-      statusIcon: statusIcon[item.status],
-      statusToken: statusToken[item.status],
-      priorityText: priorityLabel[item.priority],
-      priorityIcon: priorityIcon[item.priority],
-    })),
-  );
+  // Travels with the link to a request, so its page can go back to this exact view
+  protected readonly listParams = computed(() => toParams(this.query()));
 
   // MatSort speaks 'asc' / 'desc'; the API and the URL speak 'Asc' / 'Desc'
   protected readonly direction = computed(() =>
