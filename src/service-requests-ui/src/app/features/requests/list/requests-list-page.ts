@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RequestStatus } from '../../../core/api/models';
 import { labels } from '../../../core/i18n/labels.he';
+import { ActiveFilterChips } from './active-filter-chips.component';
 import { RequestsSearchState } from './requests-search.state';
 import { RequestFilters } from './request-filters.component';
 import { SummaryCards } from './summary-cards.component';
@@ -13,7 +14,14 @@ const counts = new Intl.NumberFormat('he-IL');
 /** The requests page: its state lives in the URL, through RequestsSearchState. */
 @Component({
   selector: 'app-requests-list-page',
-  imports: [MatButtonModule, MatIconModule, MatProgressBarModule, RequestFilters, SummaryCards],
+  imports: [
+    ActiveFilterChips,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    RequestFilters,
+    SummaryCards,
+  ],
   providers: [RequestsSearchState],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './requests-list-page.html',

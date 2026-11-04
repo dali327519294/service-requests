@@ -19,6 +19,13 @@ export const labels = {
   organizationStartsWith: 'שם הארגון',
   assignedTo: 'מטפל/ת',
   createdRange: 'תאריך יצירה',
+  activeFilters: 'סינונים פעילים',
+  removeFilter: 'הסרת הסינון',
+  clearAll: 'ניקוי הכל',
+  searchChip: 'חיפוש',
+  statusChip: 'סטטוס',
+  organizationChip: 'ארגון',
+  createdChip: 'נוצרה',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;
