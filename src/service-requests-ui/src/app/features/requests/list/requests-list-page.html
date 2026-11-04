@@ -44,9 +44,14 @@
         {{ labels.clearFilters }}
       </button>
     </div>
-  } @else if (state.page()) {
+  } @else if (state.page(); as page) {
     <div class="results__body" [class.results__body--stale]="state.loading()">
-      <!-- The table arrives with the table component -->
+      <app-requests-table
+        [result]="page"
+        [query]="state.query()"
+        (sortChanged)="state.update($event)"
+        (pageChanged)="state.update($event)"
+      />
     </div>
   } @else {
     <div class="skeleton" aria-hidden="true">

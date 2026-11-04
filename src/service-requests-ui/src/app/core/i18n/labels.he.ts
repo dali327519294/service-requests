@@ -26,6 +26,12 @@ export const labels = {
   statusChip: 'סטטוס',
   organizationChip: 'ארגון',
   createdChip: 'נוצרה',
+  requestsTable: 'רשימת פניות',
+  colId: 'מס׳',
+  colTitle: 'כותרת',
+  colOrganization: 'ארגון',
+  colUpdated: 'עודכנה',
+  unassigned: 'לא שויך',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;

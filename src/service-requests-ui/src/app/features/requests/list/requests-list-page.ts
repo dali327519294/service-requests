@@ -7,6 +7,7 @@ import { labels } from '../../../core/i18n/labels.he';
 import { ActiveFilterChips } from './active-filter-chips.component';
 import { RequestsSearchState } from './requests-search.state';
 import { RequestFilters } from './request-filters.component';
+import { RequestsTable } from './requests-table.component';
 import { SummaryCards } from './summary-cards.component';
 
 const counts = new Intl.NumberFormat('he-IL');
@@ -20,6 +21,7 @@ const counts = new Intl.NumberFormat('he-IL');
     MatIconModule,
     MatProgressBarModule,
     RequestFilters,
+    RequestsTable,
     SummaryCards,
   ],
   providers: [RequestsSearchState],
