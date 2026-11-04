@@ -12,6 +12,12 @@ export const labels = {
   noResultsBody: 'אין פניות שמתאימות לכל הסינונים שבחרת. אפשר להסיר סינון או לנקות הכל.',
   clearFilters: 'ניקוי כל הסינונים',
   statusFilterGroup: 'סינון לפי סטטוס',
+  searchPlaceholder: 'חיפוש לפי כותרת או שם ארגון',
+  moreFilters: 'סינון נוסף',
+  priority: 'עדיפות',
+  organizationStartsWith: 'שם הארגון מתחיל ב',
+  assignedTo: 'מטפל/ת',
+  createdRange: 'תאריך יצירה',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;

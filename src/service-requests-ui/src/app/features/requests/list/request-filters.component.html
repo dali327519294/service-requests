@@ -1,0 +1,59 @@
+<form class="filters" [formGroup]="form" (submit)="$event.preventDefault()">
+  <div class="filters__row">
+    <mat-form-field class="filters__search" appearance="outline" subscriptSizing="dynamic">
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      <input
+        matInput
+        formControlName="search"
+        [placeholder]="labels.searchPlaceholder"
+        [attr.aria-label]="labels.searchPlaceholder"
+        maxlength="100"
+      />
+    </mat-form-field>
+    <button
+      mat-stroked-button
+      type="button"
+      [attr.aria-expanded]="open()"
+      aria-controls="more-filters"
+      (click)="open.set(!open())"
+    >
+      <mat-icon aria-hidden="true">tune</mat-icon>
+      {{ labels.moreFilters }}
+      @if (advancedCount()) {
+        <span class="filters__count">({{ advancedCount() }})</span>
+      }
+    </button>
+  </div>
+
+  @if (open()) {
+    <div id="more-filters" class="filters__panel">
+      <mat-button-toggle-group
+        formControlName="priority"
+        multiple
+        class="filters__priority"
+        [attr.aria-label]="labels.priority"
+      >
+        @for (p of priorities; track p) {
+          <mat-button-toggle [value]="p">{{ priorityLabel[p] }}</mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ labels.organizationStartsWith }}</mat-label>
+        <input matInput formControlName="organizationName" maxlength="200" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ labels.assignedTo }}</mat-label>
+        <input matInput formControlName="assignedTo" maxlength="100" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ labels.createdRange }}</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate formControlName="from" (dateChange)="datesChanged()" />
+          <input matEndDate formControlName="to" (dateChange)="datesChanged()" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker" />
+        <mat-date-range-picker #picker />
+      </mat-form-field>
+    </div>
+  }
+</form>

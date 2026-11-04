@@ -9,6 +9,8 @@
   (statusToggled)="toggleStatus($event)"
 />
 
+<app-request-filters [query]="state.query()" (changed)="state.update($event)" />
+
 <section class="results" [attr.aria-busy]="state.loading()">
   @if (state.loading() && state.page()) {
     <mat-progress-bar

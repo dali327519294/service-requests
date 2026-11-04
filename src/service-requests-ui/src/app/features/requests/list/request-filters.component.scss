@@ -1,0 +1,51 @@
+.filters {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius);
+  background: var(--mat-sys-surface);
+}
+
+.filters__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filters__search {
+  flex: 1;
+}
+
+.filters__count {
+  margin-inline-start: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.filters__panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+// The priorities get a row of their own: squeezed into a grid cell, the buttons would shrink unevenly
+.filters__priority {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+// Every priority button has the same width, whatever the word and whether it shows the check mark
+.filters__priority mat-button-toggle {
+  flex: 0 0 var(--app-priority-toggle-width);
+  box-sizing: border-box; // the divider between toggles counts inside the width
+}
+
+@media (max-width: 600px) {
+  .filters__row {
+    flex-wrap: wrap;
+  }
+}

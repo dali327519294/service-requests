@@ -5,6 +5,7 @@ import {
   TestRequest,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideRouter, Router } from '@angular/router';
 import { errorInterceptor } from '../../../core/http/error.interceptor';
 import { RequestsListPage } from './requests-list-page';
@@ -16,6 +17,7 @@ describe('RequestsListPage', () => {
     TestBed.configureTestingModule({
       imports: [RequestsListPage],
       providers: [
+        provideNativeDateAdapter(),
         provideRouter([]),
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),

@@ -26,6 +26,8 @@ html {
   // Every chip in a column has the same width, whatever the word inside it
   --app-status-chip-width: 96px;
   --app-priority-chip-width: 80px;
+  // Wide enough for the longest priority with the check mark of a selected toggle
+  --app-priority-toggle-width: 112px;
 
   // Status colors: background and text pairs that pass AA contrast in both modes
   --app-status-new-bg: light-dark(#e6f1fb, #0c447c);
