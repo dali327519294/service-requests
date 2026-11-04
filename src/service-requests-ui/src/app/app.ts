@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, ElementRef, viewChild } from '@angu
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { labels } from './core/i18n/labels.he';
+import { ConnectionBanner } from './core/ui/connection-banner.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatIconModule],
+  imports: [RouterOutlet, MatIconModule, ConnectionBanner],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -8,6 +8,8 @@ export const labels = {
   requestsTitle: 'פניות',
   requestsEmptyTitle: 'רשימת הפניות תוצג כאן',
   requestsEmptyBody: 'החיפוש, הסינון והטבלה נבנים בשלב הבא.',
+  offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
+  retry: 'נסו שוב',
 } as const;
 
 export const statusLabel: Record<RequestStatus, string> = {
