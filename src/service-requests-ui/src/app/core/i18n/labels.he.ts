@@ -11,6 +11,7 @@ export const labels = {
   noResultsTitle: 'לא נמצאו פניות',
   noResultsBody: 'אין פניות שמתאימות לכל הסינונים שבחרת. אפשר להסיר סינון או לנקות הכל.',
   clearFilters: 'ניקוי כל הסינונים',
+  statusFilterGroup: 'סינון לפי סטטוס',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;
@@ -20,6 +21,14 @@ export const statusLabel: Record<RequestStatus, string> = {
   InProgress: 'בטיפול',
   Waiting: 'ממתינה',
   Completed: 'הושלמה',
+};
+
+/** Card titles: how many requests are in each status. */
+export const statusPluralLabel: Record<RequestStatus, string> = {
+  New: 'חדשות',
+  InProgress: 'בטיפול',
+  Waiting: 'ממתינות',
+  Completed: 'הושלמו',
 };
 
 export const priorityLabel: Record<RequestPriority, string> = {

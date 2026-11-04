@@ -1,0 +1,80 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+// Drawn inside the card, so selecting it never moves the row
+.card--selected {
+  background: var(--mat-sys-secondary-container);
+  box-shadow: inset 0 0 0 2px var(--mat-sys-primary);
+
+  &:hover {
+    background: var(--mat-sys-secondary-container);
+  }
+}
+
+.card__label {
+  display: flex;
+  width: 100%; // a <button> does not stretch its grid items, and the check mark belongs at the far end
+  align-items: center;
+  gap: 6px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+}
+
+.card__icon,
+.card__check {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.card__check {
+  margin-inline-start: auto;
+  color: var(--mat-sys-primary);
+}
+
+@each $status in new, in-progress, waiting, completed {
+  .card[data-status='#{$status}'] .card__icon {
+    color: var(--app-status-#{$status}-fg);
+  }
+}
+
+.card__count {
+  font: var(--mat-sys-headline-small);
+  font-variant-numeric: tabular-nums;
+}
+
+// Same size as the number, so nothing moves when the counts arrive
+.card__placeholder {
+  width: 72px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-high);
+}
+
+@media (max-width: 600px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

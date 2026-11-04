@@ -3,6 +3,12 @@
   <p class="page-subtitle">{{ countText() }}</p>
 </header>
 
+<app-summary-cards
+  [summary]="state.summary()"
+  [selected]="state.query().status"
+  (statusToggled)="toggleStatus($event)"
+/>
+
 <section class="results" [attr.aria-busy]="state.loading()">
   @if (state.loading() && state.page()) {
     <mat-progress-bar
