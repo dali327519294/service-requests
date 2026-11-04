@@ -6,8 +6,11 @@ export const labels = {
   appSubtitle: 'מערכת לטיפול בפניות ארגונים',
   skipToContent: 'דלג לתוכן הראשי',
   requestsTitle: 'פניות',
-  requestsEmptyTitle: 'רשימת הפניות תוצג כאן',
-  requestsEmptyBody: 'החיפוש, הסינון והטבלה נבנים בשלב הבא.',
+  updating: 'מעדכן את הרשימה',
+  loadFailed: 'לא הצלחנו לטעון את הפניות',
+  noResultsTitle: 'לא נמצאו פניות',
+  noResultsBody: 'אין פניות שמתאימות לכל הסינונים שבחרת. אפשר להסיר סינון או לנקות הכל.',
+  clearFilters: 'ניקוי כל הסינונים',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;
