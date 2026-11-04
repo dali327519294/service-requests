@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { debounceTime, filter, map } from 'rxjs';
 import { RequestPriority, RequestQuery } from '../../../core/api/models';
 import { REQUEST_PRIORITIES } from '../../../core/api/request-enums';
 import { labels, priorityLabel } from '../../../core/i18n/labels.he';
@@ -88,7 +88,8 @@ export class RequestFilters {
         .pipe(
           debounceTime(300),
           map((value) => value.trim()),
-          distinctUntilChanged(),
+          // Compared with the URL, not with the last value sent: the URL may have dropped it since (a removed chip)
+          filter((value) => value !== (this.query()[key] ?? '')),
           takeUntilDestroyed(),
         )
         .subscribe((value) => this.changed.emit({ [key]: value || undefined }));

@@ -42,6 +42,36 @@ describe('RequestFilters', () => {
     expect(emitted).toEqual([{ search: 'אסב' }]);
   });
 
+  it('sends the same search again after the URL dropped it', () => {
+    const { fixture, el, emitted } = render();
+    const search = el.querySelector<HTMLInputElement>('input[formControlName=search]')!;
+    const urlBecomes = (query: RequestQuery) => {
+      fixture.componentRef.setInput('query', query);
+      fixture.detectChanges();
+    };
+
+    type(search, 'אסבסט');
+    vi.advanceTimersByTime(300);
+    urlBecomes({ search: 'אסבסט' });
+    urlBecomes({}); // its chip was removed
+    type(search, 'אסבסט');
+    vi.advanceTimersByTime(300);
+
+    expect(emitted).toEqual([{ search: 'אסבסט' }, { search: 'אסבסט' }]);
+  });
+
+  it('sends nothing when the typing ends where the URL already is', () => {
+    const { el, emitted } = render({ search: 'אסבסט' });
+    const search = el.querySelector<HTMLInputElement>('input[formControlName=search]')!;
+
+    type(search, 'אסבסטי');
+    vi.advanceTimersByTime(100);
+    type(search, 'אסבסט ');
+    vi.advanceTimersByTime(300);
+
+    expect(emitted).toEqual([]);
+  });
+
   it('shows a query from the URL without sending it back', () => {
     const { fixture, el, emitted } = render();
 
