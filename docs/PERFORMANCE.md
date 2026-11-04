@@ -20,7 +20,7 @@
 | מדדים | `SET STATISTICS IO, TIME` (דפים שנקראו, CPU, זמן כולל) ו-`SET STATISTICS XML` (תוכנית הריצה בפועל) |
 | חזרות | הרצה אחת לחימום, ואז 5 הרצות. הזמן הוא החציון. כל הקריאות מהזיכרון (logical reads) |
 | "בלי אינדקסים" | אותה שאילתה עם `WITH (INDEX(1))`, שמכריח סריקה של הטבלה כולה. לא נמחק שום אינדקס |
-| תוכניות ריצה | נשמרו ב-[`performance/plans/`](performance/plans), אחת לכל פקודה, לפני התיקון ואחריו. נפתחות ב-SSMS |
+| תוכניות ריצה | ארבע התוכניות שמוכיחות את הממצא המרכזי נשמרו ב-[`performance/plans/`](performance/plans) (ראו מתחת לטבלת לפני/אחרי). את כל השאר הסקריפט מייצר מחדש |
 | סביבה | SQL Server LocalDB, 100,000 פניות מה-Seed, מחשב פיתוח |
 
 המדד המרכזי הוא **logical reads**: כמה דפים של 8KB SQL Server קרא. הוא לא תלוי בעומס על המחשב, ולכן הוא המדד הכי יציב להשוואה. זמני ה-CPU מוצגים לצדו.
@@ -46,6 +46,13 @@
 | 8. עדכון מותנה | — | 25 · 0ms | 25 · 0ms | Seek לפי מפתח ראשי |
 
 (בכל תא: דפים שנקראו · זמן CPU חציוני)
+
+**ההוכחה בתוכניות הריצה** (שאילתת העמוד עצמה, בלי הספירה; נפתחות ב-SSMS או ב-Azure Data Studio):
+
+| מקרה | לפני התיקון | אחרי התיקון |
+|---|---|---|
+| עמוד ראשון | [Clustered Index Scan של 100,000 שורות, ואז Sort](performance/plans/first-page-before-fix.sqlplan) | [Index Scan של 20 שורות, ו-Seek לטבלה לכל אחת](performance/plans/first-page-after-fix.sqlplan) |
+| סינון לפי סטטוס | [Clustered Index Scan, ואז Sort](performance/plans/status-filter-before-fix.sqlplan) | [Index Seek, ו-Seek לטבלה לכל שורה](performance/plans/status-filter-after-fix.sqlplan) |
 
 **עמוד 500 הוא פשרה מכוונת.** אחרי התיקון SQL Server עובר על 10,000 השורות שמדלגים עליהן לפי האינדקס, ולכל אחת חוזר לטבלה. לכן נקראים יותר דפים, אבל אין מיון, וזמן ה-CPU יורד מ-62ms ל-16ms. עמודים כאלה נדירים, והפתרון הנכון להם הוא דפדוף לפי מפתח (ראו צווארי בקבוק).
 
