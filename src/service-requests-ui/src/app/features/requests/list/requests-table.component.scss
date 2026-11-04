@@ -65,47 +65,6 @@ td {
   justify-content: center;
 }
 
-// Same width for every chip in a column; the width fits the longest word, so nothing is cut.
-// Content starts at the same edge, so the icons form one straight line down the column
-.chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
-  box-sizing: border-box;
-  padding: 2px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-  font: var(--mat-sys-label-medium);
-
-  mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-  }
-}
-
-.chip--status {
-  width: var(--app-status-chip-width);
-}
-
-@each $status in new, in-progress, waiting, completed {
-  .chip--status[data-status='#{$status}'] {
-    background: var(--app-status-#{$status}-bg);
-    color: var(--app-status-#{$status}-fg);
-  }
-}
-
-.chip--priority {
-  width: var(--app-priority-chip-width);
-  background: var(--mat-sys-surface-container-high);
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.chip--priority[data-priority='High'] {
-  color: var(--app-priority-high-fg);
-}
-
 // Narrow screens keep the columns that matter most: title, status and priority
 @media (max-width: 1023px) {
   .col--wide-only {
