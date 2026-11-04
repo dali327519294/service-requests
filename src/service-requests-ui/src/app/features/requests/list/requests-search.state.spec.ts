@@ -1,4 +1,6 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { Location } from '@angular/common';
+import { provideLocationMocks } from '@angular/common/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -26,6 +28,7 @@ describe('RequestsSearchState', () => {
       providers: [
         RequestsSearchState,
         provideRouter([]),
+        provideLocationMocks(),
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         { provide: LiveAnnouncer, useValue: { announce } },
@@ -57,6 +60,28 @@ describe('RequestsSearchState', () => {
     expect(first.cancelled).toBe(true);
     expect(second.request.params.get('status')).toBe('Waiting');
     answerAll(1);
+  });
+
+  it('moves to the last page when the page asked for is past the end', async () => {
+    TestBed.inject(RequestsSearchState);
+    await router.navigateByUrl('/?page=9999');
+
+    searches().forEach(
+      (r) =>
+        r.cancelled ||
+        r.flush({ items: [], page: 9999, pageSize: 20, totalCount: 45, totalPages: 3 }),
+    );
+    await vi.waitFor(() => expect(router.url).toBe('/?page=3'));
+
+    expect(searches().at(-1)!.request.params.get('page')).toBe('3');
+    answerAll(45);
+
+    // The empty page was replaced, not added: Back skips it.
+    // Without an app bootstrap the router does not follow Back on its own, so it is told to
+    router.setUpLocationChangeListener();
+    TestBed.inject(Location).back();
+    await vi.waitFor(() => expect(router.url).toBe('/'));
+    answerAll(45);
   });
 
   it('marks an empty result and announces the count', () => {

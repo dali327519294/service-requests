@@ -55,6 +55,16 @@ export class RequestsSearchState {
         takeUntilDestroyed(),
       )
       .subscribe(({ result, error }) => {
+        // A page past the end (an old link, or fewer results than before): show the last page instead
+        if (result && result.page > result.totalPages && result.totalPages > 0) {
+          void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: toParams({ ...this.query(), page: result.totalPages }),
+            replaceUrl: true,
+          });
+          return;
+        }
+
         this.loading.set(false);
         this.listError.set(error);
         if (result) {
