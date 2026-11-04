@@ -6,8 +6,32 @@ export const labels = {
   appSubtitle: 'מערכת לטיפול בפניות ארגונים',
   skipToContent: 'דלג לתוכן הראשי',
   requestsTitle: 'פניות',
-  requestsEmptyTitle: 'רשימת הפניות תוצג כאן',
-  requestsEmptyBody: 'החיפוש, הסינון והטבלה נבנים בשלב הבא.',
+  updating: 'מעדכן את הרשימה',
+  loadFailed: 'לא הצלחנו לטעון את הפניות',
+  noResultsTitle: 'לא נמצאו פניות',
+  noResultsBody: 'אין פניות שמתאימות לכל הסינונים שבחרת. אפשר להסיר סינון או לנקות הכל.',
+  clearFilters: 'ניקוי כל הסינונים',
+  statusFilterGroup: 'סינון לפי סטטוס',
+  searchPlaceholder: 'חיפוש לפי כותרת או שם ארגון',
+  moreFilters: 'סינון נוסף',
+  priority: 'עדיפות',
+  priorityLevel: 'רמת עדיפות',
+  organizationStartsWith: 'שם הארגון',
+  assignedTo: 'מטפל/ת',
+  createdRange: 'תאריך יצירה',
+  activeFilters: 'סינונים פעילים',
+  removeFilter: 'הסרת הסינון',
+  clearAll: 'ניקוי הכל',
+  searchChip: 'חיפוש',
+  statusChip: 'סטטוס',
+  organizationChip: 'ארגון',
+  createdChip: 'נוצרה',
+  requestsTable: 'רשימת פניות',
+  colId: 'מס׳',
+  colTitle: 'כותרת',
+  colOrganization: 'ארגון',
+  colUpdated: 'עודכנה',
+  unassigned: 'לא שויך',
   offlineMessage: 'אין חיבור לשרת. הנתונים שמוצגים עלולים להיות לא עדכניים.',
   retry: 'נסו שוב',
 } as const;
@@ -17,6 +41,14 @@ export const statusLabel: Record<RequestStatus, string> = {
   InProgress: 'בטיפול',
   Waiting: 'ממתינה',
   Completed: 'הושלמה',
+};
+
+/** Card titles: how many requests are in each status. */
+export const statusPluralLabel: Record<RequestStatus, string> = {
+  New: 'חדשות',
+  InProgress: 'בטיפול',
+  Waiting: 'ממתינות',
+  Completed: 'הושלמו',
 };
 
 export const priorityLabel: Record<RequestPriority, string> = {

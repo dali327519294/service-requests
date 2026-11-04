@@ -1,0 +1,94 @@
+<table
+  mat-table
+  matSort
+  matSortDisableClear
+  [dataSource]="rows()"
+  [matSortActive]="query().sortBy ?? 'CreatedAt'"
+  [matSortDirection]="direction()"
+  (matSortChange)="sort($event)"
+  [attr.aria-label]="labels.requestsTable"
+>
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef class="col--wide-only">{{ labels.colId }}</th>
+    <td mat-cell *matCellDef="let r" class="col--wide-only num">{{ r.id }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="title">
+    <th mat-header-cell *matHeaderCellDef>{{ labels.colTitle }}</th>
+    <td mat-cell *matCellDef="let r">
+      <a class="title" [routerLink]="['/requests', r.id]">{{ r.title }}</a>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="organizationName">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header="OrganizationName" class="col--medium-up">
+      {{ labels.colOrganization }}
+    </th>
+    <td mat-cell *matCellDef="let r" class="col--medium-up">{{ r.organizationName }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header="Status" class="col--chip">
+      {{ labels.statusChip }}
+    </th>
+    <td mat-cell *matCellDef="let r" class="col--chip">
+      <span class="chip chip--status" [attr.data-status]="r.statusToken">
+        <mat-icon aria-hidden="true">{{ r.statusIcon }}</mat-icon
+        >{{ r.statusText }}
+      </span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="priority">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header="Priority" class="col--chip">
+      {{ labels.priority }}
+    </th>
+    <td mat-cell *matCellDef="let r" class="col--chip">
+      <span class="chip chip--priority" [attr.data-priority]="r.priority">
+        <mat-icon aria-hidden="true">{{ r.priorityIcon }}</mat-icon
+        >{{ r.priorityText }}
+      </span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="assignedTo">
+    <th mat-header-cell *matHeaderCellDef class="col--wide-only">{{ labels.assignedTo }}</th>
+    <td mat-cell *matCellDef="let r" class="col--wide-only">
+      @if (r.assignedTo) {
+        {{ r.assignedTo }}
+      } @else {
+        <span class="muted">{{ labels.unassigned }}</span>
+      }
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header="CreatedAt" class="col--medium-up">
+      {{ labels.createdChip }}
+    </th>
+    <td mat-cell *matCellDef="let r" class="col--medium-up num">
+      <span dir="ltr">{{ r.createdAt | date: 'dd/MM/yy HH:mm' }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="updatedAt">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header="UpdatedAt" class="col--wide-only">
+      {{ labels.colUpdated }}
+    </th>
+    <td mat-cell *matCellDef="let r" class="col--wide-only num">
+      <span dir="ltr">{{ r.updatedAt | date: 'dd/MM/yy HH:mm' }}</span>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columns"></tr>
+  <tr mat-row *matRowDef="let r; columns: columns"></tr>
+</table>
+
+<mat-paginator
+  showFirstLastButtons
+  [length]="result().totalCount"
+  [pageIndex]="result().page - 1"
+  [pageSize]="result().pageSize"
+  [pageSizeOptions]="pageSizes"
+  (page)="paged($event)"
+/>

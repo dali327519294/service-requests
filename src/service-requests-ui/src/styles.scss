@@ -4,6 +4,9 @@
 
 html {
   height: 100%;
+  // The scrollbar is always there, so the page never shifts sideways when a reload briefly changes
+  // its height. (scrollbar-gutter: stable on the root was measured and still let the width change.)
+  overflow-y: scroll;
   // Light by default, dark when the operating system asks for it
   color-scheme: light dark;
   @include mat.theme(

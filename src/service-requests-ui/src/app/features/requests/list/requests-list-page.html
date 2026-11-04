@@ -1,0 +1,63 @@
+<header class="page-header">
+  <h1 class="page-title">{{ labels.requestsTitle }}</h1>
+  <p class="page-subtitle">{{ countText() }}</p>
+</header>
+
+<app-summary-cards
+  [summary]="state.summary()"
+  [selected]="state.query().status"
+  (statusToggled)="toggleStatus($event)"
+/>
+
+<app-request-filters [query]="state.query()" (changed)="state.update($event)" />
+
+<app-active-filter-chips
+  [query]="state.query()"
+  (removed)="state.update($event)"
+  (cleared)="state.clearFilters()"
+/>
+
+<section class="results" [attr.aria-busy]="state.loading()">
+  @if (state.loading() && state.page()) {
+    <mat-progress-bar
+      class="results__progress"
+      mode="indeterminate"
+      [attr.aria-label]="labels.updating"
+    />
+  }
+
+  @if (state.error(); as error) {
+    <div class="state" role="alert">
+      <mat-icon class="state__icon state__icon--error" aria-hidden="true">error</mat-icon>
+      <h2 class="state__title">{{ labels.loadFailed }}</h2>
+      <p class="state__body">{{ error.message }}</p>
+      <button mat-stroked-button type="button" (click)="state.retry()">
+        <mat-icon aria-hidden="true">refresh</mat-icon>{{ labels.retry }}
+      </button>
+    </div>
+  } @else if (state.empty()) {
+    <div class="state" role="status">
+      <mat-icon class="state__icon" aria-hidden="true">search_off</mat-icon>
+      <h2 class="state__title">{{ labels.noResultsTitle }}</h2>
+      <p class="state__body">{{ labels.noResultsBody }}</p>
+      <button mat-stroked-button type="button" (click)="state.clearFilters()">
+        {{ labels.clearFilters }}
+      </button>
+    </div>
+  } @else if (state.page(); as page) {
+    <div class="results__body" [class.results__body--stale]="state.loading()">
+      <app-requests-table
+        [result]="page"
+        [query]="state.query()"
+        (sortChanged)="state.update($event)"
+        (pageChanged)="state.update($event)"
+      />
+    </div>
+  } @else {
+    <div class="skeleton" aria-hidden="true">
+      @for (row of skeletonRows; track row) {
+        <div class="skeleton__row"></div>
+      }
+    </div>
+  }
+</section>

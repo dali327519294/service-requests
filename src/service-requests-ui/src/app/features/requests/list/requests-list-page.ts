@@ -1,51 +1,49 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { RequestStatus } from '../../../core/api/models';
 import { labels } from '../../../core/i18n/labels.he';
+import { ActiveFilterChips } from './active-filter-chips.component';
+import { RequestsSearchState } from './requests-search.state';
+import { RequestFilters } from './request-filters.component';
+import { RequestsTable } from './requests-table.component';
+import { SummaryCards } from './summary-cards.component';
 
-/** The requests page. For now only its frame; the list arrives in the next tasks. */
+const counts = new Intl.NumberFormat('he-IL');
+
+/** The requests page: its state lives in the URL, through RequestsSearchState. */
 @Component({
   selector: 'app-requests-list-page',
-  imports: [MatIconModule],
+  imports: [
+    ActiveFilterChips,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    RequestFilters,
+    RequestsTable,
+    SummaryCards,
+  ],
+  providers: [RequestsSearchState],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <h1 class="page-title">{{ labels.requestsTitle }}</h1>
-    <section class="empty-state" aria-live="polite">
-      <mat-icon class="empty-state__icon" aria-hidden="true">inbox</mat-icon>
-      <h2 class="empty-state__title">{{ labels.requestsEmptyTitle }}</h2>
-      <p class="empty-state__body">{{ labels.requestsEmptyBody }}</p>
-    </section>
-  `,
-  styles: `
-    .page-title {
-      margin: 0 0 24px;
-      font: var(--mat-sys-headline-small);
-    }
-    .empty-state {
-      display: grid;
-      justify-items: center;
-      gap: 8px;
-      padding: 64px 24px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--app-radius);
-      background: var(--mat-sys-surface);
-      text-align: center;
-    }
-    .empty-state__icon {
-      width: 48px;
-      height: 48px;
-      font-size: 48px;
-      color: var(--mat-sys-primary);
-    }
-    .empty-state__title {
-      margin: 0;
-      font: var(--mat-sys-title-medium);
-    }
-    .empty-state__body {
-      margin: 0;
-      color: var(--mat-sys-on-surface-variant);
-    }
-  `,
+  templateUrl: './requests-list-page.html',
+  styleUrl: './requests-list-page.scss',
 })
 export class RequestsListPage {
+  protected readonly state = inject(RequestsSearchState);
   protected readonly labels = labels;
+  protected readonly skeletonRows = [1, 2, 3, 4, 5, 6];
+  protected readonly countText = computed(() => {
+    const page = this.state.page();
+    return page ? `נמצאו ${counts.format(page.totalCount)} פניות` : '';
+  });
+
+  /** A card adds its status to the filter, or takes it out if it is already there. */
+  protected toggleStatus(status: RequestStatus): void {
+    const current = this.state.query().status ?? [];
+    const next = current.includes(status)
+      ? current.filter((s) => s !== status)
+      : [...current, status];
+    void this.state.update({ status: next });
+  }
 }

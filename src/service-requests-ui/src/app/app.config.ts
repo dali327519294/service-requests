@@ -8,7 +8,7 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { provideRouter } from '@angular/router';
@@ -32,6 +32,7 @@ export const appConfig: ApplicationConfig = {
     // Dates and numbers in pipes, and the date picker, follow Israeli conventions
     { provide: LOCALE_ID, useValue: 'he' },
     { provide: MAT_DATE_LOCALE, useValue: 'he-IL' },
+    provideNativeDateAdapter(),
     { provide: MatPaginatorIntl, useClass: HebrewPaginatorIntl },
     // <mat-icon> uses the self-hosted rounded Material Symbols
     provideAppInitializer(() => {

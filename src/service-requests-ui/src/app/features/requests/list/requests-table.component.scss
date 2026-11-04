@@ -1,0 +1,120 @@
+// Fixed layout: column widths come from here, not from the rows on screen,
+// so sorting or paging never moves the columns
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.mat-column-id {
+  width: 72px;
+}
+
+.mat-column-organizationName {
+  width: 180px;
+}
+
+.mat-column-status {
+  width: 128px; // chip 96px + cell padding
+}
+
+.mat-column-priority {
+  width: 112px; // chip 80px + cell padding
+}
+
+.mat-column-assignedTo {
+  width: 140px;
+}
+
+.mat-column-createdAt,
+.mat-column-updatedAt {
+  width: 150px;
+}
+
+// The title has no width: it takes whatever is left.
+// A long title or organization wraps to a second line instead of widening its column
+td {
+  overflow-wrap: anywhere;
+}
+
+.num {
+  font-variant-numeric: tabular-nums; // digits of equal width, so columns of numbers line up
+  white-space: nowrap;
+}
+
+.title {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Chip columns: header and chip both centered, so every chip sits under its title
+.col--chip {
+  text-align: center;
+}
+
+:host ::ng-deep .col--chip .mat-sort-header-container {
+  justify-content: center;
+}
+
+// Same width for every chip in a column; the width fits the longest word, so nothing is cut.
+// Content starts at the same edge, so the icons form one straight line down the column
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  box-sizing: border-box;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font: var(--mat-sys-label-medium);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.chip--status {
+  width: var(--app-status-chip-width);
+}
+
+@each $status in new, in-progress, waiting, completed {
+  .chip--status[data-status='#{$status}'] {
+    background: var(--app-status-#{$status}-bg);
+    color: var(--app-status-#{$status}-fg);
+  }
+}
+
+.chip--priority {
+  width: var(--app-priority-chip-width);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.chip--priority[data-priority='High'] {
+  color: var(--app-priority-high-fg);
+}
+
+// Narrow screens keep the columns that matter most: title, status and priority
+@media (max-width: 1023px) {
+  .col--wide-only {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .col--medium-up {
+    display: none;
+  }
+}
