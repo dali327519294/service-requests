@@ -1,6 +1,7 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { RequestDetails, StatusHistoryEntry } from '../../../core/api/models';
@@ -48,6 +49,8 @@ describe('RequestDetailsPage', () => {
         ]),
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
+        // A closing dialog waits for its exit animation, which never ends in jsdom
+        { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
       ],
     });
     backend = TestBed.inject(HttpTestingController);
@@ -147,5 +150,54 @@ describe('RequestDetailsPage', () => {
 
     const back = el().querySelector<HTMLAnchorElement>('a.back')!;
     expect(decodeURIComponent(back.getAttribute('href')!)).toBe('/requests?status=New&search=רעש');
+  });
+
+  describe('when someone changed the request first', () => {
+    // While this page showed New (v1), another user moved the request to Waiting (v2)
+    const changedMeanwhile = details({
+      status: 'Waiting',
+      rowVersion: 'v2',
+      allowedTransitions: ['InProgress', 'Completed'],
+    });
+
+    async function conflict() {
+      const page = await open();
+      answer();
+      page.harness.detectChanges();
+      page.el().querySelector<HTMLButtonElement>('.actions button')!.click(); // בטיפול
+      backend
+        .expectOne('/api/requests/42/status')
+        .flush({ current: changedMeanwhile }, { status: 409, statusText: 'Conflict' });
+      backend.expectOne('/api/requests/42/history').flush(history);
+      page.harness.detectChanges();
+      await new Promise((r) => setTimeout(r)); // the dialog renders into the overlay
+      const pane = () => document.querySelector<HTMLElement>('.cdk-overlay-pane');
+      return { ...page, pane };
+    }
+
+    afterEach(() => document.querySelector('.cdk-overlay-container')?.replaceChildren());
+
+    it('shows the current state at once and explains who changed it', async () => {
+      const { el, pane } = await conflict();
+
+      expect(el().querySelector('.header app-status-chip')?.textContent).toContain('ממתינה');
+      expect(pane()?.textContent).toContain('הפנייה שונתה בינתיים');
+      expect(pane()?.textContent).toContain('dana.levi');
+    });
+
+    it('tries again with the version it now holds', async () => {
+      const { pane, harness } = await conflict();
+
+      [...pane()!.querySelectorAll<HTMLButtonElement>('button')]
+        .find((b) => b.textContent?.includes('לשנות בכל זאת'))!
+        .click();
+      await new Promise((r) => setTimeout(r));
+      harness.detectChanges();
+
+      const retry = backend.expectOne('/api/requests/42/status');
+      expect(retry.request.body).toEqual({ status: 'InProgress', rowVersion: 'v2' });
+      retry.flush(details({ status: 'InProgress', rowVersion: 'v3', allowedTransitions: [] }));
+      backend.expectOne('/api/requests/42/history').flush(history);
+    });
   });
 });

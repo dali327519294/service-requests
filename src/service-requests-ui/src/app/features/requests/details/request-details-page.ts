@@ -2,17 +2,19 @@ import { DatePipe, Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { RequestDetails, RequestStatus, StatusHistoryEntry } from '../../../core/api/models';
 import { RequestsApiService } from '../../../core/api/requests-api.service';
 import { ApiError } from '../../../core/http/api-error';
 import { labels, pageTitle, statusLabel } from '../../../core/i18n/labels.he';
 import { PriorityChip, StatusChip } from '../../../core/ui/request-chips';
 import { statusIcon } from '../../../core/ui/status-presentation';
+import { ConflictChoice, ConflictData, ConflictDialog } from '../dialogs/conflict-dialog.component';
 import { StatusHistory } from './status-history.component';
 
 /** One request: its details, the statuses it may move to, and its history. */
@@ -34,6 +36,7 @@ import { StatusHistory } from './status-history.component';
 export class RequestDetailsPage {
   private readonly api = inject(RequestsApiService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly title = inject(Title);
   private readonly destroyRef = inject(DestroyRef);
   private readonly id = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
@@ -94,9 +97,42 @@ export class RequestDetailsPage {
         },
         error: (error: ApiError) => {
           this.saving.set(false);
-          // A conflict gets its own dialog in the next part; until then every failure is a message
-          this.snackBar.open(error.message, labels.close, { duration: 8000 });
+          if (error.kind === 'conflict' && error.current) {
+            this.resolveConflict(status, error.current);
+          } else {
+            this.snackBar.open(error.message, labels.close, { duration: 8000 });
+          }
         },
+      });
+  }
+
+  /**
+   * The page shows the current state at once, so nothing stale stays behind the dialog.
+   * The history says who changed it; if it fails to load, the dialog opens without that line.
+   */
+  private resolveConflict(attempted: RequestStatus, current: RequestDetails): void {
+    this.request.set(current);
+    this.api
+      .getHistory(current.id)
+      .pipe(
+        catchError(() => of(null)),
+        switchMap((history) => {
+          if (history) {
+            this.history.set(history);
+          }
+          return this.dialog
+            .open<ConflictDialog, ConflictData, ConflictChoice>(ConflictDialog, {
+              data: { attempted, current, lastChange: history?.[0] },
+              width: '440px',
+            })
+            .afterClosed();
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((choice) => {
+        if (choice === 'retry') {
+          this.changeStatus(attempted); // now with the current rowVersion
+        }
       });
   }
 }
