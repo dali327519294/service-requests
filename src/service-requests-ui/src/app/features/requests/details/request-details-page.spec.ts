@@ -126,6 +126,8 @@ describe('RequestDetailsPage', () => {
     expect(el().querySelector('.header app-status-chip')?.textContent).toContain('בטיפול');
     expect(buttons()).toEqual([{ text: 'ממתינה', disabled: false }]);
     expect(el().querySelectorAll('.history__item').length).toBe(3);
+    // The button that was used is gone; focus stays in the status section, not at the top of the page
+    expect(document.activeElement?.id).toBe('change-title');
   });
 
   it('says the request was not found, without offering to try again', async () => {
@@ -183,6 +185,18 @@ describe('RequestDetailsPage', () => {
       expect(el().querySelector('.header app-status-chip')?.textContent).toContain('ממתינה');
       expect(pane()?.textContent).toContain('הפנייה שונתה בינתיים');
       expect(pane()?.textContent).toContain('dana.levi');
+    });
+
+    it('puts focus on the status section when the dialog closes', async () => {
+      const { pane, harness } = await conflict();
+
+      [...pane()!.querySelectorAll<HTMLButtonElement>('button')]
+        .find((b) => b.textContent?.includes('הצגת המצב העדכני'))!
+        .click();
+      await new Promise((r) => setTimeout(r));
+      harness.detectChanges();
+
+      expect(document.activeElement?.id).toBe('change-title');
     });
 
     it('tries again with the version it now holds', async () => {

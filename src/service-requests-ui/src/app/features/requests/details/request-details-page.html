@@ -60,7 +60,9 @@
     </section>
 
     <section class="panel" aria-labelledby="change-title">
-      <h2 id="change-title" class="panel__title">{{ labels.changeStatus }}</h2>
+      <h2 #changeTitle id="change-title" class="panel__title" tabindex="-1">
+        {{ labels.changeStatus }}
+      </h2>
       @if (r.allowedTransitions.length) {
         <div class="actions">
           @for (status of r.allowedTransitions; track status) {

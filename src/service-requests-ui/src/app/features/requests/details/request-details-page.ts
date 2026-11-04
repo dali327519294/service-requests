@@ -1,5 +1,13 @@
 import { DatePipe, Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -48,6 +56,9 @@ export class RequestDetailsPage {
   protected readonly history = signal<readonly StatusHistoryEntry[]>([]);
   protected readonly loadError = signal<ApiError | null>(null);
   protected readonly saving = signal(false);
+  // The status buttons change with the status, so the button that was used is gone afterwards;
+  // focus goes to the section title instead of falling back to the top of the page
+  private readonly changeTitle = viewChild<ElementRef<HTMLElement>>('changeTitle');
 
   // The list's filters travel with the link from the table; the browser keeps them on refresh.
   // A page opened from an address of its own goes back to the plain list
@@ -87,6 +98,7 @@ export class RequestDetailsPage {
         next: (updated) => {
           this.saving.set(false);
           this.request.set(updated);
+          this.focusChangeTitle();
           this.snackBar.open(`${labels.statusUpdated}: ${statusLabel[updated.status]}`, undefined, {
             duration: 4000,
           });
@@ -124,6 +136,7 @@ export class RequestDetailsPage {
             .open<ConflictDialog, ConflictData, ConflictChoice>(ConflictDialog, {
               data: { attempted, current, lastChange: history?.[0] },
               width: '440px',
+              restoreFocus: false, // the button that opened it may no longer exist
             })
             .afterClosed();
         }),
@@ -132,7 +145,13 @@ export class RequestDetailsPage {
       .subscribe((choice) => {
         if (choice === 'retry') {
           this.changeStatus(attempted); // now with the current rowVersion
+        } else {
+          this.focusChangeTitle();
         }
       });
+  }
+
+  private focusChangeTitle(): void {
+    this.changeTitle()?.nativeElement.focus();
   }
 }
