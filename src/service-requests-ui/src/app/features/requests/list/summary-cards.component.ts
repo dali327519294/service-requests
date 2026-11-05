@@ -38,9 +38,9 @@ const counts = new Intl.NumberFormat('he-IL');
           @if (summary(); as s) {
             <span class="card__count">{{ format(s.byStatus[status]) }}</span>
           } @else if (failed()) {
-            <span class="card__count card__count--missing" [attr.aria-label]="labels.countMissing"
-              >—</span
-            >
+            <!-- The dash is for the eye; screen readers get the words (aria-label on a span is not read reliably) -->
+            <span class="card__count card__count--missing" aria-hidden="true">—</span>
+            <span class="visually-hidden">{{ labels.countMissing }}</span>
           } @else {
             <span class="card__placeholder" aria-hidden="true"></span>
           }

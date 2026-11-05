@@ -34,6 +34,13 @@ describe('SummaryCards', () => {
       '—',
       '—',
     ]);
+    // The dash is for the eye; a screen reader hears words, in a way every reader supports
+    expect(
+      cards.every((c) => c.querySelector('.card__count')?.getAttribute('aria-hidden') === 'true'),
+    ).toBe(true);
+    expect(cards.map((c) => c.querySelector('.visually-hidden')?.textContent?.trim())).toEqual(
+      Array(4).fill('המספר לא זמין'),
+    );
     expect(el.querySelector('.cards')?.getAttribute('aria-busy')).toBe('false');
   });
 
