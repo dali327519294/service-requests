@@ -1,0 +1,191 @@
+# Service Requests API – sample requests
+#
+# Runs in Visual Studio (2022 17.12+), Rider, or VS Code with the REST Client extension:
+# start the API (`dotnet run --project src/ServiceRequests.Api`) and send the requests in order.
+# No request uses a fixed id: each one that needs a request fetches it first (# @name), so the file works
+# against any database. The responses below each request were recorded against the seeded database.
+
+@baseUrl = http://localhost:5150
+@user = reviewer
+
+### Health
+# 200: Healthy
+GET {{baseUrl}}/health
+
+
+### ── Listing: paging, search, filters, sorting ──
+
+### First page, default sort (newest first), 20 per page
+# 200: { "page": 1, "pageSize": 20, "totalCount": 100000, "totalPages": 5000, "items": [
+#   { "id": 95908, "title": "השלכת פסולת ביתית – רעננה", "organizationName": "מחלבת אשקלון",
+#     "status": "InProgress", "priority": "Medium", "assignedTo": "hila.gabay",
+#     "createdAt": "2026-10-31T23:51:00Z", "updatedAt": "2026-11-01T07:16:00Z", "rowVersion": "AAAAAAAGgTA=" }, … ] }
+GET {{baseUrl}}/api/requests
+
+
+### Paging: page 2 of 50
+# 200: { "page": 2, "pageSize": 50, "items": [ …50 items… ], … }
+GET {{baseUrl}}/api/requests?page=2&pageSize=50
+
+
+### Text search in the title or the organization name ("אסבסט")
+# 200: { "totalCount": 4879, "items": [ { "title": "בקשה לפינוי אסבסט – אילת", … }, … ] }
+GET {{baseUrl}}/api/requests?search=%D7%90%D7%A1%D7%91%D7%A1%D7%98
+
+
+### All the filters together: two statuses (OR), priority, organization name prefix ("מוסך"), creation range
+# 200: { "totalCount": 36, "items": [ { "status": "Waiting", "priority": "High",
+#   "organizationName": "מוסך פתח תקווה", "createdAt": "2026-10-31T15:22:00Z", … }, … ] }
+# Dates need an offset (Z or +03:00); createdTo is exclusive
+GET {{baseUrl}}/api/requests?status=New&status=Waiting&priority=High&organizationName=%D7%9E%D7%95%D7%A1%D7%9A&createdFrom=2026-10-01T00:00:00Z&createdTo=2026-11-01T00:00:00Z
+
+
+### Sorting: priority ascending; Id breaks ties, so a row never appears on two pages
+# 200: items: Low 1, Low 11, Low 14
+GET {{baseUrl}}/api/requests?sortBy=Priority&sortDirection=Asc&pageSize=3
+
+
+### 400: page size above 100
+# 400: { "title": "One or more validation errors occurred.", "status": 400,
+#   "errors": { "PageSize": [ "The field PageSize must be between 1 and 100." ] }, "traceId": "00-…" }
+GET {{baseUrl}}/api/requests?pageSize=500
+
+
+### 400: a date without an offset (the server would have to guess the time zone)
+# 400: { "errors": { "CreatedFrom": [ "Must be an ISO 8601 date and time with an offset, such as 2026-04-01T00:00:00+03:00." ] }, … }
+GET {{baseUrl}}/api/requests?createdFrom=2026-10-01T00:00:00
+
+
+### ── Summary ──
+
+### Counts by status and priority (no filter: served from the cache)
+# 200: { "total": 100000,
+#   "byStatus": { "New": 9998, "InProgress": 39854, "Waiting": 15165, "Completed": 34983 },
+#   "byPriority": { "Low": 30130, "Medium": 49973, "High": 19897 } }
+GET {{baseUrl}}/api/requests/summary
+
+
+### Faceted: each count ignores its own filter, so the other statuses show what choosing them would give
+# 200: { "total": 1960,
+#   "byStatus": { "New": 1960, "InProgress": 7921, "Waiting": 3053, "Completed": 6963 },
+#   "byPriority": { "Low": 2928, "Medium": 5110, "High": 1960 } }
+GET {{baseUrl}}/api/requests/summary?status=New&priority=High
+
+
+### ── One request, status update, concurrency, history ──
+
+### Pick a request in status New (used by the next requests)
+# @name newRequest
+GET {{baseUrl}}/api/requests?status=New&pageSize=1
+
+### Its details, with the statuses it may move to
+# 200: { "id": 66205, "title": "בקשה לבדיקת קרקע – חדרה", "status": "New", "rowVersion": "AAAAAAAGDLQ=",
+#   "allowedTransitions": [ "InProgress" ], … }
+GET {{baseUrl}}/api/requests/{{newRequest.response.body.$.items[0].id}}
+
+
+### 404: no such request
+# 404: { "title": "Not Found", "status": 404, "traceId": "00-…" }
+GET {{baseUrl}}/api/requests/999999
+
+
+### Change its status, sending the version that was read
+# 200: { "id": 66205, "status": "InProgress", "rowVersion": "AAAAAAAJTtI=",
+#   "allowedTransitions": [ "Waiting", "Completed" ], … }
+PATCH {{baseUrl}}/api/requests/{{newRequest.response.body.$.items[0].id}}/status
+Content-Type: application/json
+X-User-Name: {{user}}
+
+{
+  "status": "InProgress",
+  "rowVersion": "{{newRequest.response.body.$.items[0].rowVersion}}"
+}
+
+
+### 409: the same change again, with the version that is no longer current
+# 409: { "title": "The request was changed by someone else.", "detail": "Review its current state and try again.",
+#   "current": { "status": "InProgress", "rowVersion": "AAAAAAAJTtI=", "allowedTransitions": [ "Waiting", "Completed" ], … } }
+PATCH {{baseUrl}}/api/requests/{{newRequest.response.body.$.items[0].id}}/status
+Content-Type: application/json
+X-User-Name: {{user}}
+
+{
+  "status": "InProgress",
+  "rowVersion": "{{newRequest.response.body.$.items[0].rowVersion}}"
+}
+
+
+### Its history: who changed it, when, from what to what (newest first)
+# 200: [ { "previousStatus": "New", "newStatus": "InProgress", "changedAt": "2026-11-05T09:23:08.58Z", "changedBy": "reviewer" } ]
+GET {{baseUrl}}/api/requests/{{newRequest.response.body.$.items[0].id}}/history
+
+
+### 400: no user (until sign-in exists, the user comes from X-User-Name)
+# 400: { "title": "The request has no valid user.",
+#   "detail": "The X-User-Name header must contain a user name of up to 100 characters." }
+PATCH {{baseUrl}}/api/requests/{{newRequest.response.body.$.items[0].id}}/status
+Content-Type: application/json
+
+{
+  "status": "Waiting",
+  "rowVersion": "{{newRequest.response.body.$.items[0].rowVersion}}"
+}
+
+
+### Pick a completed request (a final status)
+# @name completedRequest
+GET {{baseUrl}}/api/requests?status=Completed&pageSize=1
+
+### 400: a transition the rules do not allow, with the statuses that are allowed
+# 400: { "title": "The status change is not allowed.",
+#   "detail": "A request in status Completed cannot move to InProgress.", "allowedTransitions": [] }
+PATCH {{baseUrl}}/api/requests/{{completedRequest.response.body.$.items[0].id}}/status
+Content-Type: application/json
+X-User-Name: {{user}}
+
+{
+  "status": "InProgress",
+  "rowVersion": "{{completedRequest.response.body.$.items[0].rowVersion}}"
+}
+
+
+### ── Bulk update: partial success ──
+
+### Pick two requests in status New
+# @name twoNew
+GET {{baseUrl}}/api/requests?status=New&pageSize=2
+
+### One valid, one with a stale version, one missing, one completed: each gets its own outcome, and the answer is 200
+# 200: { "requested": 4, "succeeded": 1, "failed": 3, "results": [
+#   { "id": 87930, "outcome": "Updated", "error": null, "rowVersion": "AAAAAAAJTtM=" },
+#   { "id": 27152, "outcome": "Conflict", "error": "The request was changed by someone else.", "rowVersion": null },
+#   { "id": 999999, "outcome": "NotFound", "error": "The request does not exist.", "rowVersion": null },
+#   { "id": 24759, "outcome": "InvalidTransition", "error": "A request in status Completed cannot move to InProgress.", "rowVersion": null } ] }
+POST {{baseUrl}}/api/requests/bulk-status
+Content-Type: application/json
+X-User-Name: {{user}}
+
+{
+  "status": "InProgress",
+  "items": [
+    { "id": {{twoNew.response.body.$.items[0].id}}, "rowVersion": "{{twoNew.response.body.$.items[0].rowVersion}}" },
+    { "id": {{twoNew.response.body.$.items[1].id}}, "rowVersion": "AAAAAAAAAAA=" },
+    { "id": 999999, "rowVersion": "AAAAAAAAAAA=" },
+    { "id": {{completedRequest.response.body.$.items[0].id}}, "rowVersion": "{{completedRequest.response.body.$.items[0].rowVersion}}" }
+  ]
+}
+
+
+### 400: the whole batch is rejected when it is malformed (here, the same id twice) – nothing is updated
+# 400: { "status": 400, "errors": { "Items[1].Id": [ "Appears more than once." ] } }
+POST {{baseUrl}}/api/requests/bulk-status
+Content-Type: application/json
+X-User-Name: {{user}}
+
+{
+  "status": "InProgress",
+  "items": [
+    { "id": {{twoNew.response.body.$.items[0].id}}, "rowVersion": "{{twoNew.response.body.$.items[0].rowVersion}}" },
+    { "id": {{twoNew.response.body.$.items[0].id}}, "rowVersion": "{{twoNew.response.body.$.items[0].rowVersion}}" }
+  ]
+}

@@ -41,7 +41,7 @@ public sealed class RequestStatusService(ServiceRequestsDbContext db, ICurrentUs
             return new UpdateStatusOutcome.InvalidTransition(previous, newStatus, StatusTransitions.AllowedFrom(previous));
         }
 
-        db.StatusHistory.Add(request.ChangeStatus(newStatus, changedBy, timeProvider.GetUtcNow().UtcDateTime));
+        db.StatusHistory.Add(request.ChangeStatus(newStatus, changedBy, Now()));
         try
         {
             // One transaction: UPDATE ... WHERE RowVersion = <the version read above>, and the history INSERT
@@ -66,7 +66,7 @@ public sealed class RequestStatusService(ServiceRequestsDbContext db, ICurrentUs
         var items = bulk.Items?.Select(i => i ?? throw new ArgumentException("Items must be validated first.", nameof(bulk))).ToList()
             ?? throw new ArgumentException("Items are required.", nameof(bulk));
         var changedBy = currentUser.UserName;
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = Now();
 
         // One query for the whole batch
         var ids = items.Select(i => i.Id).ToList();
@@ -144,4 +144,12 @@ public sealed class RequestStatusService(ServiceRequestsDbContext db, ICurrentUs
         : throw new ArgumentException("RowVersion must be validated before it gets here.", nameof(rowVersion));
 
     private static BulkItemResult Failed(int id, BulkOutcome outcome, string error) => new(id, outcome, error, null);
+
+    // Dates are stored to the millisecond (HavePrecision(3) in ServiceRequestsDbContext), and SQL Server cuts the
+    // rest. Taking "now" at that precision keeps the answer of an update equal to what any later read returns
+    private DateTime Now()
+    {
+        var now = timeProvider.GetUtcNow().UtcDateTime;
+        return now.AddTicks(-(now.Ticks % TimeSpan.TicksPerMillisecond));
+    }
 }

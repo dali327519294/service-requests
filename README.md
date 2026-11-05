@@ -7,6 +7,7 @@
 | מסמך | מה יש בו |
 |---|---|
 | [מדריך לבודק](docs/REVIEWER_GUIDE.md) | כל דרישה: איך רואים אותה, איפה הקוד, איזו בדיקה ואיזה תיעוד |
+| [requests.http](requests.http) | בקשות לכל יכולת של ה-API, עם התשובות האמיתיות. רץ ב-Visual Studio, Rider או VS Code |
 | [ביצועים](docs/PERFORMANCE.md) | מדידות לפני/אחרי, תוכניות ריצה, אינדקסים וצווארי בקבוק |
 | [תוכנית עבודה](docs/WORK_PLAN.md) | משימות, הערכה מול שעות בפועל, נקודות החלטה ולקחים |
 | [החלטות ארכיטקטורה](docs/adr) | ADR לכל החלטה מרכזית |
@@ -38,7 +39,7 @@ npm start
 ## בדיקות
 
 ```bash
-dotnet test                       # השרת: 69 בדיקות יחידה, 78 בדיקות אינטגרציה מול SQL Server אמיתי
+dotnet test                       # השרת: 69 בדיקות יחידה, 79 בדיקות אינטגרציה מול SQL Server אמיתי
 cd src/service-requests-ui
 npm test -- --watch=false         # הממשק: 73 בדיקות (Vitest)
 ```
