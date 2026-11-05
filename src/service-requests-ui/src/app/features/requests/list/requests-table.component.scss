@@ -6,7 +6,7 @@ table {
 }
 
 .mat-column-id {
-  width: 72px;
+  width: 88px; // up to six digits (100000) and the cell padding; a cut id shows the wrong digits in RTL
 }
 
 .mat-column-organizationName {
