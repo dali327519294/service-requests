@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceRequests.Application.Requests;
 using ServiceRequests.Application.Requests.Contracts;
 using ServiceRequests.Domain.Requests;
@@ -115,6 +116,25 @@ public class UpdateStatusTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Empty(await HistoryOf(request.Id));
+    }
+
+    [Fact]
+    public async Task The_answer_carries_the_same_time_a_later_read_returns()
+    {
+        // A moment with a fraction of a millisecond, which the database cannot store
+        var clock = new FixedTimeProvider(new DateTimeOffset(2026, 11, 5, 12, 0, 0, TimeSpan.Zero).AddTicks(5_806_000));
+        using var api = factory.WithWebHostBuilder(b => b.ConfigureServices(s => s.AddSingleton<TimeProvider>(clock)));
+        var request = await TestData.AddRequestAsync(factory, status: RequestStatus.New);
+        var client = api.CreateClient();
+        client.DefaultRequestHeaders.Add("X-User-Name", "dana");
+
+        var answer = (await (await client.PatchAsJsonAsync($"/api/requests/{request.Id}/status",
+            new { status = "InProgress", rowVersion = RowVersionCodec.Encode(request.RowVersion) }))
+            .Content.ReadFromJsonAsync<RequestDetailsDto>(Json))!;
+        var read = (await client.GetFromJsonAsync<RequestDetailsDto>($"/api/requests/{request.Id}", Json))!;
+
+        Assert.Equal(read.UpdatedAt, answer.UpdatedAt);
+        Assert.Equal(read.UpdatedAt, Assert.Single(await HistoryOf(request.Id)).ChangedAt);
     }
 
     private async Task<HttpResponseMessage> Patch(int id, object body, string? user = "dana")
