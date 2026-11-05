@@ -485,13 +485,6 @@ $RECYCLE.BIN/
 dist/
 .angular/
 
-# --- Personal interview prep (not part of the submission) ---
-interview-sentences.md
-study-notes-*.md
-
-# --- Local AI execution workspace (plan progress ledger) ---
-.superpowers/
-
 # --- Performance measurement output (docs/performance/measure.ps1 recreates it) ---
 docs/performance/results-*.json
 docs/performance/plans/*/
