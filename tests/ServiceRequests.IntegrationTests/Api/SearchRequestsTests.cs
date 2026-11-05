@@ -207,6 +207,31 @@ public class SearchRequestsTests(ApiFactory factory) : IClassFixture<ApiFactory>
             () => queries.SearchAsync(new RequestSearchQuery(), new CancellationToken(canceled: true)));
     }
 
+    [Fact]
+    public async Task A_rare_search_reads_the_table_once_and_still_pages_newest_first()
+    {
+        var term = $"נדיר{Guid.NewGuid():N}"[..12];
+        var start = new DateTime(2026, 3, 1, 8, 0, 0, DateTimeKind.Utc);
+        var matches = new List<ServiceRequest>();
+        for (var i = 0; i < 3; i++)
+        {
+            matches.Add(await Add(title: $"בקשה {term} {i}", createdAt: start.AddDays(i)));
+        }
+        await Add(title: "בקשה אחרת", createdAt: start.AddDays(10));
+
+        // The recorder is shared by the whole class: only the commands of this search count
+        var before = factory.Sql.Commands.Count;
+        var first = await Search($"search={Uri.EscapeDataString(term)}&pageSize=2");
+        var firstPageSql = factory.Sql.Commands.Skip(before).ToList();
+        var second = await Search($"search={Uri.EscapeDataString(term)}&pageSize=2&page=2");
+
+        Assert.Equal(3, first.TotalCount);
+        Assert.Equal([matches[2].Id, matches[1].Id], first.Items.Select(i => i.Id));
+        Assert.Equal([matches[0].Id], second.Items.Select(i => i.Id));
+        // With so few matches, walking the date index would check nearly every row (docs/PERFORMANCE.md)
+        Assert.Contains(firstPageSql, sql => sql.Contains("WITH (INDEX(1))", StringComparison.Ordinal));
+    }
+
     private Task<ServiceRequest> Add(string title = "Test request", string organizationSuffix = "",
         RequestStatus status = RequestStatus.New, RequestPriority priority = RequestPriority.Medium,
         string? assignedTo = null, DateTime? createdAt = null) =>

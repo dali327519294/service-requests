@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ServiceRequests.Application.Common;
 using ServiceRequests.Infrastructure.Persistence;
 
@@ -26,8 +27,15 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             // Lets a test force "another user saved first" between a request's read and its write
             services.AddSingleton(new RaceInjector(_connectionString));
             services.AddSingleton<ISaveChangesInterceptor>(sp => sp.GetRequiredService<RaceInjector>());
+            // Lets a test see the SQL EF Core sent; only this provider gets the command log
+            services.AddSingleton(Sql);
+            services.AddLogging(logging => logging
+                .AddProvider(Sql)
+                .AddFilter<SqlRecorder>(DbLoggerCategory.Database.Command.Name, LogLevel.Information));
         });
     }
+
+    public SqlRecorder Sql { get; } = new();
 
     public Task InitializeAsync() => ExecuteDbAsync(db => db.Database.MigrateAsync());
 
