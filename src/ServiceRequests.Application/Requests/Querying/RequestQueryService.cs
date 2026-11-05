@@ -20,7 +20,13 @@ public sealed class RequestQueryService(ServiceRequestsDbContext db)
             return new PagedResult<RequestListItemDto>([], query.Page, query.PageSize, totalCount);
         }
 
-        var items = await Sort(filtered, query.SortBy, query.SortDirection)
+        // The count says how rare the matches are; the table hint sits in a derived table that EF composes the
+        // filters, sort and paging over
+        var source = SearchPlan.ScansTheTable(query.Search, totalCount, skip, query.PageSize)
+            ? db.Requests.FromSql($"SELECT * FROM [Requests] WITH (INDEX(1))").AsNoTracking().Apply(query)
+            : filtered;
+
+        var items = await Sort(source, query.SortBy, query.SortDirection)
             .Skip((int)skip)
             .Take(query.PageSize)
             .Select(r => new RequestListItemDto(r.Id, r.Title, r.OrganizationName, r.Status, r.Priority,
