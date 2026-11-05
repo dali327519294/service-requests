@@ -43,6 +43,8 @@ export const labels = {
   noHistory: 'עדיין לא היו שינויי סטטוס',
   changedTo: 'אל',
   statusUpdated: 'הסטטוס עודכן',
+  historyRefreshFailed: 'הסטטוס עודכן, אבל לא הצלחנו לרענן את ההיסטוריה. רענון הדף יציג אותה.',
+  countMissing: 'המספר לא זמין',
   close: 'סגירה',
   conflictTitle: 'הפנייה שונתה בינתיים',
   conflictBody: 'משתמש אחר עדכן את הפנייה אחרי שפתחת אותה, ולכן השינוי שלך לא נשמר.',

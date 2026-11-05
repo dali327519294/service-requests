@@ -32,6 +32,8 @@ export class RequestsSearchState {
   private readonly list = signal<PagedResult<RequestListItem> | null>(null);
   private readonly listError = signal<ApiError | null>(null);
   readonly summary = signal<RequestSummary | null>(null);
+  // A failed summary is not "still loading": the cards show that the counts are missing
+  readonly summaryFailed = signal(false);
   readonly loading = signal(false);
 
   readonly page = this.list.asReadonly();
@@ -79,10 +81,18 @@ export class RequestsSearchState {
       this.reload$.pipe(map(() => filtersOf(now()))),
     )
       .pipe(
-        switchMap((filters) => this.api.getSummary(filters).pipe(catchError(() => of(null)))),
+        switchMap((filters) =>
+          this.api.getSummary(filters).pipe(
+            map((summary) => ({ summary, failed: false })),
+            catchError(() => of({ summary: null, failed: true })),
+          ),
+        ),
         takeUntilDestroyed(),
       )
-      .subscribe((summary) => this.summary.set(summary));
+      .subscribe(({ summary, failed }) => {
+        this.summary.set(summary);
+        this.summaryFailed.set(failed);
+      });
   }
 
   /** Any change other than the page itself starts over at page 1. */

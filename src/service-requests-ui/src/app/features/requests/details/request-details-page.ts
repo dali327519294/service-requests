@@ -105,7 +105,12 @@ export class RequestDetailsPage {
           this.api
             .getHistory(updated.id)
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((history) => this.history.set(history));
+            .subscribe({
+              next: (history) => this.history.set(history),
+              // The change is saved; only the list of changes is out of date, so it stays and the user is told
+              error: () =>
+                this.snackBar.open(labels.historyRefreshFailed, labels.close, { duration: 8000 }),
+            });
         },
         error: (error: ApiError) => {
           this.saving.set(false);

@@ -8,16 +8,42 @@ const summary: RequestSummary = {
   byPriority: { Low: 0, Medium: 0, High: 0 },
 };
 
-function render(inputs: { summary?: RequestSummary | null; selected?: RequestStatus[] }) {
+function render(inputs: {
+  summary?: RequestSummary | null;
+  selected?: RequestStatus[];
+  failed?: boolean;
+}) {
   const fixture = TestBed.createComponent(SummaryCards);
   fixture.componentRef.setInput('summary', inputs.summary ?? null);
   fixture.componentRef.setInput('selected', inputs.selected);
+  fixture.componentRef.setInput('failed', inputs.failed ?? false);
   fixture.detectChanges();
   const cards = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')];
   return { fixture, cards };
 }
 
 describe('SummaryCards', () => {
+  it('shows a dash, not a loading placeholder, when the counts could not be loaded', () => {
+    const { fixture, cards } = render({ summary: null, failed: true });
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.card__placeholder')).toBeNull();
+    expect(cards.map((c) => c.querySelector('.card__count')?.textContent?.trim())).toEqual([
+      '—',
+      '—',
+      '—',
+      '—',
+    ]);
+    // The dash is for the eye; a screen reader hears words, in a way every reader supports
+    expect(
+      cards.every((c) => c.querySelector('.card__count')?.getAttribute('aria-hidden') === 'true'),
+    ).toBe(true);
+    expect(cards.map((c) => c.querySelector('.visually-hidden')?.textContent?.trim())).toEqual(
+      Array(4).fill('המספר לא זמין'),
+    );
+    expect(el.querySelector('.cards')?.getAttribute('aria-busy')).toBe('false');
+  });
+
   it('shows every status with its count', () => {
     const { cards } = render({ summary });
 

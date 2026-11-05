@@ -20,7 +20,7 @@
 **דרישות:** [.NET SDK 10](https://dotnet.microsoft.com/download/dotnet/10.0) · [Node.js 24](https://nodejs.org) · SQL Server LocalDB (מגיע עם Visual Studio, או [להורדה נפרדת](https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb)).
 
 ```bash
-# 1. ה-API (http://localhost:5150). בהרצה הראשונה: יוצר את בסיס הנתונים ו-100,000 פניות (כ-15 שניות)
+# 1. ה-API (http://localhost:5150). בהרצה הראשונה: בונה, יוצר את בסיס הנתונים ו-100,000 פניות (כחצי דקה)
 dotnet run --project src/ServiceRequests.Api
 
 # 2. הממשק, בחלון נוסף (http://localhost:4200)
@@ -41,7 +41,7 @@ npm start
 ```bash
 dotnet test                       # השרת: 69 בדיקות יחידה, 79 בדיקות אינטגרציה מול SQL Server אמיתי
 cd src/service-requests-ui
-npm test -- --watch=false         # הממשק: 73 בדיקות (Vitest)
+npm test -- --watch=false         # הממשק: 76 בדיקות (Vitest)
 ```
 
 - **בדיקות היחידה:** כללי מעברי הסטטוס, ולידציה של בקשות, וכלל בחירת התוכנית בחיפוש.
