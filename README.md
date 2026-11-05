@@ -39,7 +39,7 @@ npm start
 ## בדיקות
 
 ```bash
-dotnet test                       # השרת: 69 בדיקות יחידה, 78 בדיקות אינטגרציה מול SQL Server אמיתי
+dotnet test                       # השרת: 69 בדיקות יחידה, 79 בדיקות אינטגרציה מול SQL Server אמיתי
 cd src/service-requests-ui
 npm test -- --watch=false         # הממשק: 73 בדיקות (Vitest)
 ```
