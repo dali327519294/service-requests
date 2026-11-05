@@ -130,6 +130,27 @@ describe('RequestDetailsPage', () => {
     expect(document.activeElement?.id).toBe('change-title');
   });
 
+  it('keeps the history it has and says so when refreshing it fails after a change', async () => {
+    const { harness, el } = await open();
+    answer();
+    harness.detectChanges();
+
+    el().querySelector<HTMLButtonElement>('.actions button')!.click();
+    backend
+      .expectOne('/api/requests/42/status')
+      .flush(details({ status: 'InProgress', rowVersion: 'v2', allowedTransitions: ['Waiting'] }));
+    backend
+      .expectOne('/api/requests/42/history')
+      .flush({ traceId: '00-x-01' }, { status: 500, statusText: 'x' });
+    harness.detectChanges();
+    await new Promise((r) => setTimeout(r)); // the new message opens once the previous one has closed
+
+    expect(el().querySelectorAll('.history__item').length).toBe(2);
+    expect(document.querySelector('.mat-mdc-snack-bar-label')?.textContent).toContain(
+      'הסטטוס עודכן, אבל לא הצלחנו לרענן את ההיסטוריה',
+    );
+  });
+
   it('says the request was not found, without offering to try again', async () => {
     const { harness, el } = await open();
     backend.expectOne('/api/requests/42').flush(null, { status: 404, statusText: 'Not Found' });
