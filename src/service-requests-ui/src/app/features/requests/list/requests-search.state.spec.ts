@@ -84,6 +84,21 @@ describe('RequestsSearchState', () => {
     answerAll(45);
   });
 
+  it('marks the summary as failed instead of leaving it loading, and loads it again on retry', () => {
+    const state = TestBed.inject(RequestsSearchState);
+    searches()[0].flush(pageOf(5));
+    summaries()[0].flush({ traceId: '00-x-01' }, { status: 500, statusText: 'x' });
+
+    expect(state.summary()).toBeNull();
+    expect(state.summaryFailed()).toBe(true);
+
+    state.retry();
+    answerAll(5);
+
+    expect(state.summaryFailed()).toBe(false);
+    expect(state.summary()?.total).toBe(5);
+  });
+
   it('marks an empty result and announces the count', () => {
     const state = TestBed.inject(RequestsSearchState);
 

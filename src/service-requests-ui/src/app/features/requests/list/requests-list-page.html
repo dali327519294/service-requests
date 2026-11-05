@@ -5,6 +5,7 @@
 
 <app-summary-cards
   [summary]="state.summary()"
+  [failed]="state.summaryFailed()"
   [selected]="state.query().status"
   (statusToggled)="toggleStatus($event)"
 />

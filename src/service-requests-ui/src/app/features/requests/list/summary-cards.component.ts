@@ -17,7 +17,7 @@ const counts = new Intl.NumberFormat('he-IL');
       class="cards"
       role="group"
       [attr.aria-label]="labels.statusFilterGroup"
-      [attr.aria-busy]="!summary()"
+      [attr.aria-busy]="!summary() && !failed()"
     >
       @for (status of statuses; track status) {
         <button
@@ -37,6 +37,10 @@ const counts = new Intl.NumberFormat('he-IL');
           </span>
           @if (summary(); as s) {
             <span class="card__count">{{ format(s.byStatus[status]) }}</span>
+          } @else if (failed()) {
+            <span class="card__count card__count--missing" [attr.aria-label]="labels.countMissing"
+              >—</span
+            >
           } @else {
             <span class="card__placeholder" aria-hidden="true"></span>
           }
@@ -48,6 +52,7 @@ const counts = new Intl.NumberFormat('he-IL');
 })
 export class SummaryCards {
   readonly summary = input<RequestSummary | null>(null);
+  readonly failed = input(false);
   readonly selected = input<readonly RequestStatus[] | undefined>(undefined);
   readonly statusToggled = output<RequestStatus>();
 
